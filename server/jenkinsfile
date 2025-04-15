@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        SERVER_USER = 'your-server-user'
+        SERVER_IP = 'your-server-ip'
+        SERVER_DIR = '/home/your-server-user/deployment-folder'
+    }
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                echo 'Cloning source code...'
+            }
+        }
+
+        stage('Build React App') {
+            steps {
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Build Node App') {
+            steps {
+                dir('backend') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Copy Files to Server') {
+            steps {
+                sshagent (credentials: ['your-ssh-credential-id']) {
+                    sh """
+                        scp -r * ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy on Server') {
+            steps {
+                sshagent (credentials: ['your-ssh-credential-id']) {
+                    sh """
+                        ssh ${SERVER_USER}@${SERVER_IP} '
+                        cd ${SERVER_DIR} &&
+                        docker-compose down &&
+                        docker-compose up -d --build
+                        '
+                    """
+                }
+            }
+        }
+    }
+}
