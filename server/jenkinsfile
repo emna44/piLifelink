@@ -8,25 +8,26 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repo') {
+        stage('Install dependencies') {
             steps {
-                echo 'Cloning source code...'
-            }
-        }
-
-        stage('Build React App') {
-            steps {
-                dir('frontend') {
+                script {
                     sh 'npm install'
-                    sh 'npm run build'
                 }
             }
         }
 
-        stage('Build Node App') {
+        stage('Unit Test') {
             steps {
-                dir('backend') {
-                    sh 'npm install'
+                script {
+                    sh 'npm test'
+                }
+            }
+        }
+
+        stage('Build application') {
+            steps {
+                script {
+                    sh 'npm run build-dev'
                 }
             }
         }
