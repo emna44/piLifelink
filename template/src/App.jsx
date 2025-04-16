@@ -25,6 +25,7 @@ import FactoryAuth from "./login/2FactorAuth";
 import Appointment from "./admin/appointment";
 import OperationCalendarMedecin from "./medecin/Operation";
 import Rdv from "./patient/rdv"; 
+import Complaint from "./patient/Complaint";
 import OperationCalendarPatient from "./patient/Operation";
 import MesRdv from "./patient/MesRdv";
 import PatientCalendar from "./patient/patientCalendar";
@@ -69,6 +70,9 @@ const App = () => {
           <Route path="/patient" element={<Pation />} />
           <Route path="/patientCalendar/:patientId" element={<PatientCalendar />} />
           <Route path="/options/:userId" element={<MesRdv />} />
+          <Route path="/home" element={<Homepage />} />
+          <Route path="/specialite" element={<ListeSpecialites />} />
+          <Route path="/complaints/:userId" element={<Complaint />} />
 
         </Route>
 

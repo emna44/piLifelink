@@ -40,6 +40,7 @@ export const Navigation = (props) => {
       console.error("User ID not found");
     }
   };
+  
 
   return (
     <nav id="menu" className="navbar navbar-default navbar-fixed-top">
@@ -56,7 +57,6 @@ export const Navigation = (props) => {
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-      
         </div>
 
         <div
@@ -64,21 +64,23 @@ export const Navigation = (props) => {
           id="bs-example-navbar-collapse-1"
         >
           <ul className="nav navbar-nav navbar-right">
-            <li>
-              <a href="#features" className="page-scroll">
-                Emergency
+          <li>
+            <a href="#home" className="page-scroll">Home</a>
+          </li>
+          <li>
+            <a href="#specialite" className="page-scroll">List of Specialites</a>
+          </li>
+          <li>
+              <a href="#complaints" className="page-scroll" onClick={() => navigate(`/complaints/${userId}`)}>
+                Complaints
               </a>
             </li>
             <li>
-              <a href="#services" className="page-scroll">
-                List Appointments
+              <a href="#contact" className="page-scroll">
+                Contact
               </a>
             </li>
-            <li>
-              <a href="#portfolio" className="page-scroll">
-                Health History
-              </a>
-            </li>
+            
             <li>
               <a href="#testimonials" className="page-scroll">
                 Chatbot
