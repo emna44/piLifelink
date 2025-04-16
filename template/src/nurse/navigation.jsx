@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import Appointment from "./appointment";
 // Ajoute ici d'autres composants comme Operation, Schedule, etc. selon tes besoins
-import { Navigation } from './Navigation';
 
 const NavigationComponent = () => {
   const [userName, setUserName] = useState("Utilisateur");
