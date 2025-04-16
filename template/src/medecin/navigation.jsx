@@ -6,6 +6,8 @@ import DoctorCalendar from './doctorCalendar';
 import Operation from './Operation';
 import MesRdvMedecin from "./MesRdvMedecin";
 import OperationAndDoctorCalendar from "./OperationAndDoctorCalendar";
+import ListPatients from "./ListPatients";
+import ListPatientr from "./ListPatientr";
 
 export const Navigation = () => {
   const navigate = useNavigate();
@@ -43,8 +45,10 @@ export const Navigation = () => {
         return <DoctorCalendar doctorId={userId} />;
       case "profile":
         return <div>Profil de l'utilisateur #{userId}</div>;
-      case "liste":
-        return <div>Liste des patients</div>;
+        case "liste":
+          return <ListPatients doctorId={userId} />;
+          case "liste1":
+            return <ListPatientr doctorId={userId} />;  
       case "operations":
         return <Operation doctorId={userId} />;
       case "Rendez-vous":

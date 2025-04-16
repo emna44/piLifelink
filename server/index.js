@@ -1044,5 +1044,44 @@ app.get('/appointments/patient/:userId', async (req, res) => {
         res.status(500).json({ message: 'Erreur serveur' });
     }
 });
+app.get("/patients/:doctorId", async (req, res) => {
+    try {
+        const { doctorId } = req.params;
+        const operations = await OperationModel.find({ doctor: doctorId }).populate("patient");
+        
+        // Extraire les patients sans doublons
+        const uniquePatients = Array.from(new Set(operations.map(op => op.patient._id.toString())))
+            .map(id => operations.find(op => op.patient._id.toString() === id).patient);
 
+        res.json(uniquePatients);
+    } catch (error) {
+        res.status(500).json({ error: "Erreur lors de la récupération des patients." });
+    }
+});
+
+
+app.get("/appointments/patients/:doctorId", async (req, res) => {
+    try {
+        const { doctorId } = req.params;
+
+        const operations = await AppointmentModel.find({ doctor: doctorId }).populate("patient");
+
+        // Filtrer ceux qui ont bien un patient
+        const patientsWithData = operations
+            .filter(op => op.patient && op.patient._id)
+            .map(op => op.patient);
+
+        // Éliminer les doublons par _id
+        const seen = new Set();
+        const uniquePatients = patientsWithData.filter(patient => {
+            const id = patient._id.toString();
+            return seen.has(id) ? false : seen.add(id);
+        });
+
+        res.json(uniquePatients);
+    } catch (error) {
+        console.error("Erreur serveur :", error);
+        res.status(500).json({ error: "Erreur lors de la récupération des patients." });
+    }
+});
 app.listen(3001, () => console.log("✅ Server is running on http://localhost:3001"));
