@@ -4,7 +4,11 @@ import { FaUserCircle } from "react-icons/fa";
 import "./Navigation.css";
 import DoctorCalendar from './doctorCalendar';
 import Operation from './Operation';
+<<<<<<< HEAD
 import MesRdvMedecin from "./MesRdv";
+=======
+import MesRdvMedecin from "./MesRdvMedecin";
+>>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
 import OperationAndDoctorCalendar from "./OperationAndDoctorCalendar";
 
 export const Navigation = () => {

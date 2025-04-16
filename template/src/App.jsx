@@ -28,7 +28,11 @@ import Rdv from "./patient/rdv";
 import OperationCalendarPatient from "./patient/Operation";
 import MesRdv from "./patient/MesRdv";
 import PatientCalendar from "./patient/patientCalendar";
+<<<<<<< HEAD
 import MesRdvMedecin from "./medecin/MesRdv"
+=======
+import MesRdvMedecin from "./medecin/MesRdvMedecin"
+>>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
 export const scroll = new SmoothScroll('a[href*="#"]', {
   speed: 1000,
   speedAsDuration: true,
@@ -56,7 +60,11 @@ const App = () => {
      
        
         <Route path="/medecins/:specialite" element={<Medecins />} />
+<<<<<<< HEAD
         <Route path="/rdv/:idMedecin" element={<Rdv />} />
+=======
+        <Route path="/rdv/:idMedecin/:idPatient" element={<Rdv />} />
+>>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
 
     
 

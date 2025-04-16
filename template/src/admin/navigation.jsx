@@ -7,10 +7,16 @@ import { FilterNurse } from "./nursefilter";
 import { Patinetfilter } from "./patientfilter";
 import Ambulance from "./ambulance";
 import CreateAmbulance from "./createAmbulance";
+<<<<<<< HEAD
 import Appointment from "./appointment";
 import Materiel from "./Materiel";
 import Operation from "../medecin/Operation";
 import AddRoom from "./room";
+=======
+import Materiel from "./Materiel";
+import Operation from "../medecin/Operation";
+import Room from "./room";
+>>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
 import AddOperation from "./AddOperation";
 export const Navigation = () => {
   const [selectedMenu, setSelectedMenu] = useState("dashboard");
@@ -67,10 +73,15 @@ export const Navigation = () => {
           return <Materiel/>;
          case "operation":
           return <AddOperation></AddOperation>
+<<<<<<< HEAD
        case "Appointment":
         return <Appointment/>;
       case "room":
         return <AddRoom></AddRoom>;
+=======
+      case "room":
+        return <Room></Room>;
+>>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
       case "ambulance":
         return (
           <div>
@@ -127,7 +138,10 @@ export const Navigation = () => {
           <li><button onClick={() => setSelectedMenu("nurse")} style={linkStyle}>Nurse</button></li>
           <li><button onClick={() => setSelectedMenu("material")} style={linkStyle}>Material</button></li>
           <li><button onClick={() => setSelectedMenu("operation")} style={linkStyle}>Operation</button></li>
+<<<<<<< HEAD
           <li><button onClick={() => setSelectedMenu("Appointment")} style={linkStyle}>Appointment</button></li>
+=======
+>>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
 
           <li><button onClick={() => setSelectedMenu("room")} style={linkStyle}>Room</button></li>
           <li><button onClick={() => setSelectedMenu("ambulance")} style={linkStyle}>Ambulance Staff</button></li>
