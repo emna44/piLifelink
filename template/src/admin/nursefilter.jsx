@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 export const FilterNurse = () => {
   const [nurses,setNurses]=useState([])
-  const [loading,setLoading]= useState(false);
+  const [setLoading]= useState(false);
 
   useEffect(()=>{
     fetchNurses();

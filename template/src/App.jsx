@@ -3,9 +3,8 @@ import React, { useState, useEffect } from "react";
 import JsonData from "./data/data.json";
 import SmoothScroll from "smooth-scroll";
 import { createContext } from "react";
-import CreateAmbulance from "./admin/createAmbulance";
 import "./App.css";
-import {BrowserRouter,Routes,Route} from 'react-router-dom'
+import {Routes,Route} from 'react-router-dom'
 import Signin from "./login/login";
 import Pation from "./patient/patient";
 import Register from "./login/register";
@@ -28,24 +27,16 @@ import Rdv from "./patient/rdv";
 import OperationCalendarPatient from "./patient/Operation";
 import MesRdv from "./patient/MesRdv";
 import PatientCalendar from "./patient/patientCalendar";
-<<<<<<< HEAD
-import MesRdvMedecin from "./medecin/MesRdv"
-=======
-import MesRdvMedecin from "./medecin/MesRdvMedecin"
->>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
+import MesRdvMedecin from "./medecin/MesRdvMedecin" 
 export const scroll = new SmoothScroll('a[href*="#"]', {
   speed: 1000,
   speedAsDuration: true,
 });
 
 export const RecoveryContext = createContext();
-
-
 const App = () => {
-  const [landingPageData, setLandingPageData] = useState({});
-  useEffect(() => {
-    setLandingPageData(JsonData);
-  }, []);
+  const [setLandingPageData] = useState({});
+  useEffect(() => {setLandingPageData(JsonData);}, []);
 
   const [email, setEmail] = useState();
   const [otp, setOTP] = useState();
@@ -60,11 +51,7 @@ const App = () => {
      
        
         <Route path="/medecins/:specialite" element={<Medecins />} />
-<<<<<<< HEAD
-        <Route path="/rdv/:idMedecin" element={<Rdv />} />
-=======
-        <Route path="/rdv/:idMedecin/:idPatient" element={<Rdv />} />
->>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
+        <Route path="/rdv/:idMedecin/:idPatient" element={<Rdv />} /> {/* Using latest version */}
 
     
 
@@ -112,13 +99,6 @@ const App = () => {
      </Routes>
      </RecoveryContext.Provider>
     </>
-     
-      
-      
-      
-     
-
-    
   );
 };
 
