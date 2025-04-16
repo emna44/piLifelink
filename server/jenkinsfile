@@ -7,6 +7,17 @@ pipeline {
         SERVER_DIR = '/home/your-server-user/deployment-folder'
     }
 
+scm {
+    git {
+        remote {
+            url 'https://github.com/emna44/piLifelink.git'
+        }
+        branch 'main'  // Ensure this points to the correct branch
+    }
+}
+
+
+
     stages {
         stage('Clone Repo') {
             steps {
