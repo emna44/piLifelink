@@ -6,21 +6,23 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import DateTimePicker from 'react-datetime-picker';
 import './rdv.css';
+import Popping from './popping'; // ➕ import du composant modal
 
 const localizer = momentLocalizer(moment);
 
 const Rdv = () => {
-  const { idMedecin } = useParams();
+  const { idMedecin, idPatient } = useParams();
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [requestMessage, setRequestMessage] = useState('');
 
+  const [open, setOpen] = useState(false);           // ➕ État pour la modale
+  const [currentEvent, setCurrentEvent] = useState(null); // ➕ État pour l’événement sélectionné
+
   const fetchData = async () => {
     try {
       const appointmentsResponse = await axios.get(`http://localhost:3001/appointments/medecin/${idMedecin}`);
-
-      // Vérifie que c'est un tableau
       const appointments = Array.isArray(appointmentsResponse.data) ? appointmentsResponse.data : [];
 
       const formattedAppointments = appointments.map(appt => ({
@@ -29,6 +31,7 @@ const Rdv = () => {
           : 'Rendez-vous',
         start: new Date(appt.startTime),
         end: new Date(appt.endTime),
+        description: appt.description || 'Pas de description',
       }));
 
       const operationsResponse = await axios.get(`http://localhost:3001/doctor/${idMedecin}`);
@@ -38,6 +41,7 @@ const Rdv = () => {
         title: `Opération : ${op.description}`,
         start: new Date(op.startTime),
         end: new Date(op.endTime),
+        description: op.description,
       }));
 
       setEvents([...formattedAppointments, ...formattedOperations]);
@@ -54,6 +58,11 @@ const Rdv = () => {
     setSelectedDate(slotInfo.start);
     setSelectedTime(slotInfo.start);
     setRequestMessage('');
+  };
+
+  const handleSelectEvent = (event) => {
+    setCurrentEvent(event);
+    setOpen(true);
   };
 
   const isSlotAvailable = (start, end) => {
@@ -88,11 +97,11 @@ const Rdv = () => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:3001/appointments`, {
+      await axios.post(`http://localhost:3001/appointments`, {
         startTime,
         endTime,
         status: 'pending',
-        patient: '661cb1e7a49fabe253a8b90a', // 🔁 À remplacer dynamiquement avec l'utilisateur connecté
+        patient: idPatient,
         doctor: idMedecin,
       });
 
@@ -107,6 +116,13 @@ const Rdv = () => {
   return (
     <div className="container">
       <h2>Prendre rendez-vous avec un médecin</h2>
+
+      <Popping
+        open={open}
+        handleClose={() => setOpen(false)}
+        event={currentEvent}
+      />
+
       <div className="calendar-container">
         <h3>Planning du médecin</h3>
         <Calendar
@@ -117,6 +133,7 @@ const Rdv = () => {
           style={{ height: 500 }}
           selectable
           onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent} // ➕ Clic sur un event = ouvrir modal
         />
 
         {selectedDate && selectedTime && (

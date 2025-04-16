@@ -59,34 +59,46 @@ app.get("/appointments", async (req, res) => {
     }
 });
 
-// Route pour ajouter un rendez-vous
 app.post("/appointments", async (req, res) => {
     try {
-        const { startTime, endTime, status, patient, doctor } = req.body;
-
-        if (!startTime || !endTime || !status || !patient || !doctor) {
-            return res.status(400).json({ message: "Tous les champs requis ne sont pas fournis" });
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(patient) || !mongoose.Types.ObjectId.isValid(doctor)) {
-            return res.status(400).json({ message: "ID patient ou médecin invalide" });
-        }
-
-        const newAppointment = new AppointmentModel({
-            startTime,
-            endTime,
-            status,
-            patient,
-            doctor
+      const { startTime, endTime, doctor, patient } = req.body;
+  
+      const newAppointment = new AppointmentModel({
+        startTime,
+        endTime,
+        status: 'pending',
+        doctor,
+        patient,
+      });
+  
+      const savedAppointment = await newAppointment.save();
+  
+      const doctorData = await UserModel.findById(doctor);
+      const patientData = await UserModel.findById(patient);
+  
+      if (doctorData && doctorData.email) {
+        await transporter.sendMail({
+          from: '"Système de Rendez-vous 👨‍⚕️" <saif.meddeb.52@gmail.com>',
+          to: doctorData.email,
+          subject: "Nouveau Rendez-vous Réservé",
+          html: `
+            <p>Bonjour Dr. ${doctorData.name},</p>
+            <p>Un nouveau rendez-vous a été réservé par le patient <strong>${patientData.name} ${patientData.lastName}</strong>.</p>
+            <p><strong>Date :</strong> ${new Date(startTime).toLocaleString()}</p>
+            <p>Merci de vérifier votre planning.</p>
+          `
         });
-
-        await newAppointment.save();
-        res.status(201).json({ message: "Rendez-vous ajouté avec succès", appointment: newAppointment });
+  
+        console.log("📧 Email envoyé au médecin:", doctorData.email);
+      }
+  
+      res.status(201).json(savedAppointment);
     } catch (error) {
-        console.error("Erreur lors de l'ajout du rendez-vous:", error);
-        res.status(500).json({ message: "Erreur serveur", error: error.message });
+      console.error("❌ Erreur lors de la création du rendez-vous :", error.message);
+      res.status(500).json({ message: "Erreur lors de la création du rendez-vous", error: error.message });
     }
-});
+  });
+
 
 app.get("/appointments/medecin/:doctorId", async (req, res) => {
     try {
@@ -122,62 +134,116 @@ app.get('/medecin/pending/:doctorId', async (req, res) => {
 
 app.put("/appointments/:id/status", async (req, res) => {
     try {
-        const { id } = req.params;
-        const { status } = req.body;
-
-        const updatedAppointment = await AppointmentModel.findByIdAndUpdate(
-            id,
-            { status },
-            { new: true } // Return the updated document
-        );
-
-        if (!updatedAppointment) {
-            return res.status(404).json({ message: "Rendez-vous non trouvé" });
+      const { id } = req.params;
+      const { status } = req.body;
+  
+      // Récupérer le rendez-vous avec les informations du patient et du médecin
+      const appointment = await AppointmentModel.findById(id);
+  
+      if (!appointment) {
+        return res.status(404).json({ message: "Rendez-vous non trouvé" });
+      }
+  
+      // Récupérer le patient et le médecin via leurs IDs
+      const patient = await UserModel.findById(appointment.patient);
+      const doctor = await UserModel.findById(appointment.doctor);
+  
+      if (!patient || !doctor) {
+        return res.status(404).json({ message: "Patient ou médecin introuvable" });
+      }
+  
+      // Mettre à jour le statut du rendez-vous
+      appointment.status = status;
+      await appointment.save();
+  
+      // Préparer les variables pour l'email
+      let subject = "";
+      let text = "";
+      const patientName = patient.name;
+      const doctorName = doctor.name;
+      const date = new Date(appointment.startTime).toLocaleString();
+  
+      // Créer le texte de l'email en fonction du statut
+      if (status === "confirmed") {
+        subject = "Confirmation de rendez-vous";
+        text = `Bonjour ${patientName},\n\nVotre rendez-vous avec Dr. ${doctorName} a été CONFIRMÉ pour le ${date}.\n\nMerci.`;
+      } else if (status === "cancelled") {
+        subject = "Annulation de rendez-vous";
+        text = `Bonjour ${patientName},\n\nNous vous informons que votre rendez-vous avec Dr. ${doctorName} prévu le ${date} a été ANNULÉ.\n\nMerci de votre compréhension.`;
+      }
+  
+      
+      if (patient?.email) {
+        try {
+          await transporter.sendMail({
+            from: `"Cabinet Médical" <saif.meddeb.52@gmail.com>`, 
+            to: patient.email, 
+            subject,
+            text,
+          });
+  
+          res.json({
+            message: "Statut mis à jour et email envoyé",
+            appointment,
+          });
+        } catch (mailError) {
+          console.error("Erreur lors de l'envoi de l'email :", mailError);
+          res.status(500).json({
+            message: "Statut mis à jour mais l'email n'a pas pu être envoyé",
+            appointment,
+            error: mailError.message,
+          });
         }
-
-        res.json(updatedAppointment);
+      } else {
+        res.json({
+          message: "Statut mis à jour, mais l'email du patient est introuvable",
+          appointment,
+        });
+      }
     } catch (error) {
-        res.status(500).json({ message: "Erreur serveur", error: error.message });
+      console.error("Erreur lors de l'update :", error);
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
-});
-
-// Update appointment status
-app.put("/appointments/:id/status", async (req, res) => {
+  });
+  
+  app.put("/appointments/:id/cancel", async (req, res) => {
     try {
-        const { id } = req.params;
-        const { status } = req.body;
-
-        const updatedAppointment = await AppointmentModel.findByIdAndUpdate(
-            id,
-            { status },
-            { new: true } // Return the updated document
-        );
-
-        if (!updatedAppointment) {
-            return res.status(404).json({ message: "Rendez-vous non trouvé" });
-        }
-
-        res.json(updatedAppointment);
+      const appointment = await AppointmentModel.findById(req.params.id);
+  
+      if (!appointment) {
+        return res.status(404).json({ message: "Rendez-vous non trouvé" });
+      }
+  
+      const patient = await UserModel.findById(appointment.patient);
+      const doctor = await UserModel.findById(appointment.doctor);
+  
+      if (!patient || !doctor) {
+        return res.status(404).json({ message: "Patient ou médecin introuvable" });
+      }
+  
+      appointment.status = "canceled";
+      await appointment.save();
+  
+      if (patient.email) {
+        const subject = "Annulation de votre rendez-vous";
+        const date = new Date(appointment.startTime).toLocaleString();
+        const text = `Bonjour ${patient.name},\n\nVotre rendez-vous avec Dr. ${doctor.name} prévu le ${date} a été ANNULÉ.\n\nMerci de votre compréhension.`;
+  
+        await transporter.sendMail({
+          from: `"Cabinet Médical" <saif.meddeb.52@gmail.com>`,
+          to: patient.email,
+          subject,
+          text,
+        });
+      }
+  
+      res.json({ message: "Statut mis à jour et email envoyé", appointment });
     } catch (error) {
-        res.status(500).json({ message: "Erreur serveur", error: error.message });
+      console.error("Erreur lors de l'annulation :", error);
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
-});
-
-// Delete appointment
-app.delete("/appointments/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deletedAppointment = await AppointmentModel.findByIdAndDelete(id);
-
-        if (!deletedAppointment) {
-            return res.status(404).json({ message: "Rendez-vous non trouvé" });
-        }
-
-        res.json({ message: "Rendez-vous supprimé avec succès", deletedAppointment });
-    } catch (error) {
-        res.status(500).json({ message: "Erreur serveur", error: error.message });
-    }
-});
+  });
+  
 
 app.get("/appointments/doctor/:doctorId", async (req, res) => {
     try {
@@ -761,7 +827,6 @@ app.put("/materials/:id", async (req, res) => {
     }
 });
 
-// Delete a material by ID
 app.delete("/materials/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -849,8 +914,7 @@ app.get('/api/medecins/:specialite', async (req, res) => {
     try {
         const { specialite } = req.params;
 
-        // Trouver les médecins ayant cette spécialité
-        const medecins = await UserModel.find({ speciality: specialite });
+        const medecins = await UserModel.find({ speciality: specialite ,role:"DOCTOR"});
 
         if (!medecins || medecins.length === 0) {
             return res.status(404).json({ message: 'Aucun médecin trouvé pour cette spécialité' });

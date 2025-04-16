@@ -23,15 +23,26 @@ export const Appointments = () => {
 
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
-      const response = await axios.put(`http://localhost:3001/appointments/${appointmentId}/status`, {
-        status: newStatus,
-      });
-
-      if (response.status !== 200) throw new Error("Erreur lors de la mise à jour du statut");
-
       if (newStatus === "cancelled") {
-        await handleDeleteAppointment(appointmentId);
+        // Appel vers la nouvelle route de mise à jour + email
+        const response = await axios.put(`http://localhost:3001/appointments/${appointmentId}/cancel`);
+        if (response.status !== 200) throw new Error("Erreur lors de l'annulation");
+        
+        // Met à jour le statut localement
+        setAppointments((prevAppointments) =>
+          prevAppointments.map((appointment) =>
+            appointment._id === appointmentId ? { ...appointment, status: newStatus } : appointment
+          )
+        );
+        alert("Rendez-vous annulé et email envoyé au patient.");
       } else {
+        // Mise à jour normale pour confirmed ou autre
+        const response = await axios.put(`http://localhost:3001/appointments/${appointmentId}/status`, {
+          status: newStatus,
+        });
+
+        if (response.status !== 200) throw new Error("Erreur lors de la mise à jour du statut");
+
         setAppointments((prevAppointments) =>
           prevAppointments.map((appointment) =>
             appointment._id === appointmentId ? { ...appointment, status: newStatus } : appointment
@@ -39,20 +50,7 @@ export const Appointments = () => {
         );
       }
     } catch (error) {
-      console.error("Erreur de connexion au serveur :", error);
-    }
-  };
-
-  const handleDeleteAppointment = async (appointmentId) => {
-    try {
-      const response = await axios.delete(`http://localhost:3001/appointments/${appointmentId}`);
-
-      if (response.status !== 200) throw new Error("Erreur lors de la suppression");
-
-      setAppointments((prevAppointments) => prevAppointments.filter((appointment) => appointment._id !== appointmentId));
-      alert(response.data.message);
-    } catch (error) {
-      console.error("Erreur lors de la suppression :", error);
+      console.error("Erreur lors du changement de statut :", error);
       alert(`Erreur : ${error.message}`);
     }
   };

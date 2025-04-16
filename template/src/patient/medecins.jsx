@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom"; // Importez useNaviga
 import "./../admin/user.css";
 
 export const Medecins = () => {
+  const idPatient = localStorage.getItem("userId");
+  console.log(idPatient)
   const { specialite } = useParams();
   const [medecins, setMedecins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,8 +33,7 @@ export const Medecins = () => {
   }, [specialite]);
 
   const handleReserve = (idMedecin) => {
-    // Redirige vers la page Rdv avec l'ID du médecin dans l'URL
-    navigate(`/rdv/${idMedecin}`);
+    navigate(`/rdv/${idMedecin}/${idPatient}`);
   };
 
   return (
