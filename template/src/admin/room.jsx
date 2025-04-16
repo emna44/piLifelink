@@ -1,69 +1,21 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-import axios from 'axios';
-
-function AddRoom() {
-  const [roomNumber, setRoomNumber] = useState('');
-  const [description, setDescription] = useState('');
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const newRoom = { roomNumber, description };
-
-    try {
-      const response = await axios.post('http://localhost:3001/addroom', newRoom);
-      setMessage(response.data.message);  
-      setRoomNumber('');
-      setDescription('');
-    } catch (error) {
-      console.error(error);
-      setMessage('Erreur lors de l\'ajout de la salle');
-    }
-  };
-
-  return (
-    <div>
-      <h2>Ajouter une salle</h2>
-      {message && <p>{message}</p>}  
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Numéro de la salle</label>
-          <input
-            type="text"
-            value={roomNumber}
-            onChange={(e) => setRoomNumber(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Ajouter la salle</button>
-      </form>
-    </div>
-  );
-}
-
-export default AddRoom;
-=======
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import RoomUpdate from "./roomUpdate";
 import "./roomList.css";
 
-const Room = () => {
+const AddRoom = () => {
+  // States for both room management and room creation
   const [rooms, setRooms] = useState([]);
   const [error, setError] = useState("");
   const [editingRoom, setEditingRoom] = useState(null);
   const [searchNumber, setSearchNumber] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState("");
+  
+  // State for simple room addition form
+  const [roomNumber, setRoomNumber] = useState("");
+  const [description, setDescription] = useState("");
+  const [message, setMessage] = useState("");
+  const [showAdvancedForm, setShowAdvancedForm] = useState(false);
 
   useEffect(() => {
     fetchRooms();
@@ -76,6 +28,23 @@ const Room = () => {
     } catch (err) {
       console.error("Erreur :", err);
       setError("Erreur lors du chargement des salles");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const newRoom = { roomNumber, description };
+
+    try {
+      const response = await axios.post("http://localhost:3001/addroom", newRoom);
+      setMessage(response.data.message);
+      setRoomNumber("");
+      setDescription("");
+      fetchRooms(); // Refresh room list after adding
+    } catch (error) {
+      console.error(error);
+      setMessage("Erreur lors de l'ajout de la salle");
     }
   };
 
@@ -96,7 +65,7 @@ const Room = () => {
   };
 
   const RoomForm = ({ onRoomAdded }) => {
-    const [roomNumber, setRoomNumber] = useState("");
+    const [advRoomNumber, setAdvRoomNumber] = useState("");
     const [availability, setAvailability] = useState(true);
     const [patient, setPatient] = useState("");
     const [patients, setPatients] = useState([]);
@@ -118,16 +87,16 @@ const Room = () => {
       fetchPatients();
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleAdvSubmit = async (e) => {
       e.preventDefault();
       try {
         await axios.post("http://localhost:3001/room", {
-          roomNumber,
+          roomNumber: advRoomNumber,
           availability,
           patient,
         });
         setSuccessMessage("Salle ajoutée avec succès !");
-        setRoomNumber("");
+        setAdvRoomNumber("");
         setAvailability(true);
         setPatient("");
         onRoomAdded();
@@ -139,16 +108,16 @@ const Room = () => {
 
     return (
       <div className="max-w-md mx-auto mb-10 p-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Room</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Add Room (Advanced)</h2>
         {successMessage && <p className="text-green-600 text-center mb-2">{successMessage}</p>}
         {errorMessage && <p className="text-red-600 text-center mb-2">{errorMessage}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleAdvSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700 font-semibold">Room Number</label>
             <input
               type="text"
-              value={roomNumber}
-              onChange={(e) => setRoomNumber(e.target.value)}
+              value={advRoomNumber}
+              onChange={(e) => setAdvRoomNumber(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
               required
             />
@@ -193,7 +162,50 @@ const Room = () => {
 
   return (
     <div className="max-w-7xl mx-auto mt-10 p-6 bg-white rounded-lg">
-      <RoomForm onRoomAdded={fetchRooms} />
+      <div className="mb-8 text-center">
+        <button 
+          onClick={() => setShowAdvancedForm(!showAdvancedForm)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          {showAdvancedForm ? "Afficher formulaire simple" : "Afficher formulaire avancé"}
+        </button>
+      </div>
+      
+      {showAdvancedForm ? (
+        <RoomForm onRoomAdded={fetchRooms} />
+      ) : (
+        <div>
+          <h2 className="text-2xl font-bold mb-4 text-center">Ajouter une salle</h2>
+          {message && <p className="text-center text-green-600 mb-2">{message}</p>}
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-10 space-y-4">
+            <div>
+              <label className="block text-gray-700 font-semibold">Numéro de la salle</label>
+              <input
+                type="text"
+                value={roomNumber}
+                onChange={(e) => setRoomNumber(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              />
+            </div>
+            <button 
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            >
+              Ajouter la salle
+            </button>
+          </form>
+        </div>
+      )}
 
       <h2 className="text-3xl font-bold mb-8 text-center">Room List</h2>
 
@@ -278,5 +290,4 @@ const Room = () => {
   );
 };
 
-export default Room;
->>>>>>> 7c4e19f2f9b86dd9f733b0b8866bfabfd5b704a8
+export default AddRoom;
