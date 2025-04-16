@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import Appointment from "./appointment";
 // Ajoute ici d'autres composants comme Operation, Schedule, etc. selon tes besoins
+import { Navigation } from './Navigation';
 
-export const Navigation = () => {
+const NavigationComponent = () => {
   const [userName, setUserName] = useState("Utilisateur");
   const [userId, setUserId] = useState(null);
   const [selectedMenu, setSelectedMenu] = useState("home");
@@ -120,3 +121,5 @@ export const Navigation = () => {
     </>
   );
 };
+
+export default NavigationComponent;
