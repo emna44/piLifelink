@@ -1,4 +1,4 @@
-import { Navigation } from "./navigation";
+import Navigation from "./navigation";
 import { Homepage } from "./homepage";
 import { ListeSpecialites } from "./specialite";
 import { Contact } from "./contact";

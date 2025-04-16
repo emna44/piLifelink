@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Navigation } from "./navigation";
+import Navigation from "./navigation";
 
 export const Complaint = (props) => {
   const { userId } = useParams();
