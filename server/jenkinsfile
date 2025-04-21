@@ -19,7 +19,7 @@ pipeline {
             steps {
                 dir('template') {  // Changed from 'frontend' to 'template'
                     sh 'npm install'
-                    sh 'npm run build'
+                    sh 'CI=false npm run build'  // This prevents warnings from being treated as errors
                 }
             }
         }

@@ -11,7 +11,7 @@ const { OAuth2Client } = require("google-auth-library");
 const AmbulanceModel = require("./models/Ambulance");
 const MaterialModel = require("./models/Material");
 const AppointmentModel = require('./models/Appointment');
-const RoomModel = require("./models/Room");
+const Room = require("./models/Room");
 const OperationModel = require('./models/Operation');
 const { ObjectId } = require('mongoose').Types; // Import ObjectId
 const ComplaintModel = require('./models/Complaint'); // Add this if it's missing
@@ -620,7 +620,7 @@ app.post("/createAmbulance", async (req, res) => {
 
 app.get('/api/rooms', async (req, res) => {
     try {
-      const rooms = await RoomModel.find(); 
+      const rooms = await Room.find(); 
       res.status(200).json(rooms);
     } catch (error) {
       console.error(error);
@@ -632,12 +632,12 @@ app.post("/addroom", async (req, res) => {
     try {
         const { roomNumber, description } = req.body;
 
-        const existingRoom = await RoomModel.findOne({ roomNumber });
+        const existingRoom = await Room.findOne({ roomNumber });
         if (existingRoom) {
             return res.status(400).json({ message: "Room with this number already exists" });
         }
 
-        const newRoom = await RoomModel.create({
+        const newRoom = await Room.create({
             roomNumber,
             description
         });
@@ -849,7 +849,7 @@ app.post('/api/operations', async (req, res) => {
 
         const patientExists = await UserModel.findById(patient);
         const doctorExists = await UserModel.findById(doctor);
-        const roomExists = await RoomModel.findById(room);
+        const roomExists = await Room.findById(room);
 
         if (!patientExists || !doctorExists || !roomExists) {
             return res.status(400).json({ message: "Le patient, le médecin ou la salle n'existent pas" });
@@ -899,7 +899,7 @@ app.get('/patient/:patientId', async (req, res) => {
 
 app.get('/api/rooms', async (req, res) => {
     try {
-        const rooms = await RoomModel.find();
+        const rooms = await Room.find();
         res.status(200).json(rooms);
     } catch (error) {
         console.error(error);
