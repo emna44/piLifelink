@@ -11,7 +11,6 @@ const { OAuth2Client } = require("google-auth-library");
 const AmbulanceModel = require("./models/Ambulance");
 const MaterialModel = require("./models/Material");
 const AppointmentModel = require('./models/Appointment');
-const Room = require('./models/Room');
 const RoomModel = require("./models/Room");
 const OperationModel = require('./models/Operation');
 const { ObjectId } = require('mongoose').Types; // Import ObjectId
