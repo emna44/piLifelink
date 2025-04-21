@@ -1,40 +1,57 @@
 pipeline {
     agent any
+
+    environment {
+        SERVER_USER = 'your-server-user'
+        SERVER_IP = 'your-server-ip'
+        SERVER_DIR = '/home/your-server-user/deployment-folder'
+    }
+
     stages {
-        stage('Checkout Code') {
+        stage('Clone Repo') {
             steps {
-                checkout scm
+                echo 'Cloning source code...'
+                checkout scm  // Automatically checks out the repository defined in Jenkins' SCM configuration
             }
         }
-        stage('Install dependencies') {
+
+        stage('Build React App') {
             steps {
-                script {
-                    // Change directory to 'server' before running npm commands
-                    sh 'cd server && npm install'
+                dir('template') {  // Changed from 'frontend' to 'template'
+                    sh 'npm install'
+                    sh 'npm run build'
                 }
             }
         }
-        stage('Unit Test') {
+
+        stage('Build Node App') {
             steps {
-                script {
-            sh 'cd server && npx jest'
+                dir('server') {  // Changed from 'server' to 'server'
+                    sh 'npm install'
                 }
             }
         }
-        stage('Build application') {
+
+        stage('Copy Files to Server') {
             steps {
-                script {
-                    sh 'cd server && npm run build-dev'
+                sshagent (credentials: ['your-ssh-credential-id']) {
+                    sh """
+                        scp -r * ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}
+                    """
                 }
             }
         }
-        stage('SonarQube Analysis') {
+
+        stage('Deploy on Server') {
             steps {
-                script {
-                    def scannerHome = tool 'scanner'
-                    withSonarQubeEnv {
-                        sh 'cd server && ${scannerHome}/bin/sonar-scanner'
-                    }
+                sshagent (credentials: ['your-ssh-credential-id']) {
+                    sh """
+                        ssh ${SERVER_USER}@${SERVER_IP} '
+                        cd ${SERVER_DIR} &&
+                        docker-compose down &&
+                        docker-compose up -d --build
+                        '
+                    """
                 }
             }
         }
