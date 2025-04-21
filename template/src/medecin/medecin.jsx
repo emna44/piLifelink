@@ -1,13 +1,12 @@
-import Navigation from "./navigation";
+import Navigation from "./navigation";  // Change from { Navigation } to just Navigation
+import { useState } from 'react';
 
-export default function Pation(){
-    return(
-        
+export default function Doctor() {
+    const [landingPageData, setLandingPageData] = useState({});
+    
+    return (
         <div>
-             <Navigation>
-
-             </Navigation>
+            <Navigation></Navigation>
         </div>
-       
     )
 }

@@ -28,6 +28,7 @@ import OperationCalendarPatient from "./patient/Operation";
 import MesRdv from "./patient/MesRdv";
 import PatientCalendar from "./patient/patientCalendar";
 import MesRdvMedecin from "./medecin/MesRdvMedecin" 
+import Navigation from "../src/nurse/Navigation"
 export const scroll = new SmoothScroll('a[href*="#"]', {
   speed: 1000,
   speedAsDuration: true,
@@ -35,7 +36,7 @@ export const scroll = new SmoothScroll('a[href*="#"]', {
 
 export const RecoveryContext = createContext();
 const App = () => {
-  const [setLandingPageData] = useState({});
+  const [landingPageData, setLandingPageData] = useState({});
   useEffect(() => {setLandingPageData(JsonData);}, []);
 
   const [email, setEmail] = useState();
