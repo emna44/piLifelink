@@ -1,4 +1,4 @@
-import Navigation from "../nurse/Navigation";
+import Navigation from "./Navigation";
 
 export default function Pation(){
     return(

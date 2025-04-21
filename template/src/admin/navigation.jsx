@@ -10,7 +10,6 @@ import CreateAmbulance from "./createAmbulance";
 import Appointment from "./appointment";
 import Materiel from "./Materiel";
 import AddRoom from "./room";
-import Operation from "../medecin/Operation";
 import AddOperation from "./AddOperation";
 
 export const Navigation = () => {
