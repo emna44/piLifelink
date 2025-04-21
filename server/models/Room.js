@@ -8,6 +8,7 @@ const RoomSchema = new mongoose.Schema({
     enum: ['available', 'occupied', 'maintenance'],
     default: 'available'
   },
+  description: String,
   patient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",

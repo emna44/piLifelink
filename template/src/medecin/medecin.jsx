@@ -1,9 +1,6 @@
-import Navigation from "./Navigation";  // Change from { Navigation } to just Navigation
-import { useState } from 'react';
+import Navigation from "./Navigation";
 
 export default function Doctor() {
-    const [landingPageData, setLandingPageData] = useState({});
-    
     return (
         <div>
             <Navigation></Navigation>
