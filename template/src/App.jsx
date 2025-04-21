@@ -35,9 +35,8 @@ export const scroll = new SmoothScroll('a[href*="#"]', {
 
 export const RecoveryContext = createContext();
 const App = () => {
-  const [setLandingPageData] = useState({});
+  const [landingPageData, setLandingPageData] = useState({});  
   useEffect(() => {setLandingPageData(JsonData);}, []);
-
   const [email, setEmail] = useState();
   const [otp, setOTP] = useState();
 
