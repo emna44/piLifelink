@@ -46,7 +46,7 @@ pipeline {
 
         stage('Deploy on Server') {
             steps {
-                sshagent (credentials: ['your-ssh-credential-id']) {
+                sshagent (credentials: ['57c7b439-bddc-42d2-a693-0f93fcd6f1d']) {
                     sh """
                         ssh ${SERVER_USER}@${SERVER_IP} '
                         cd ${SERVER_DIR} &&
