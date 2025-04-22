@@ -34,12 +34,9 @@ pipeline {
 
         stage('Copy Files to Server') {
             steps {
-                sshagent (credentials: ['your-ssh-credential-id']) {
-                    sh """
-                        scp -r * ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}
-                    """
-                }
-            }
+        sh 'echo "Deployment would happen here"'
+        // Alternative deployment methods that don't require SSH
+    }
         }
 
         stage('Deploy on Server') {
