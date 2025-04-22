@@ -1,12 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        // Replace these with your actual server details
-        SERVER_USER = 'ubuntu'  // Your actual server username
-        SERVER_IP = '192.168.1.100'  // Your actual server IP
-        SERVER_DIR = '/home/ubuntu/piLifelink'  // Actual deployment directory
-    }
+ environment {
+    SERVER_USER = 'vagrant'  
+    SERVER_IP = '192.167.33.10'  // Change from 192.168.1.100 to your VM's IP
+    SERVER_DIR = '/home/vagrant/piLifelink'
+}
 
     stages {
         stage('Clone Repo') {
