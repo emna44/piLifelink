@@ -45,8 +45,8 @@ pipeline {
 
 stage('Deploy on Server') {
     steps {
-        // Use the exact credential ID you found in Jenkins
-sshagent(['balsem.khouni@esprit.tn']) {            sh """
+        sshagent(credentials: ['SSH deployment key for PI LifeLink application']) {
+            sh """
                 ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
                 mkdir -p ${SERVER_DIR} &&
                 echo "Deployment test successful!" > ${SERVER_DIR}/test.txt
