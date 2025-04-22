@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     environment {
-        SERVER_USER = 'your-server-user'
-        SERVER_IP = 'your-server-ip'
-        SERVER_DIR = '/home/your-server-user/deployment-folder'
+        // Replace these with your actual server details
+        SERVER_USER = 'ubuntu'  // Your actual server username
+        SERVER_IP = '192.168.1.100'  // Your actual server IP
+        SERVER_DIR = '/home/ubuntu/piLifelink'  // Actual deployment directory
     }
 
     stages {
