@@ -45,7 +45,7 @@ pipeline {
 
 stage('Deploy on Server') {
     steps {
-        sshagent(credentials: ['SSH deployment key for PI LifeLink application']) {
+        sshagent(['balsem.khouni@esprit.tn']) {
             sh """
                 ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
                 mkdir -p ${SERVER_DIR} &&
