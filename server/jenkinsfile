@@ -44,17 +44,16 @@ pipeline {
         }
 
         stage('Deploy on Server') {
-            steps {
-                sshagent (credentials: ['57c7b439-bddc-42d2-a693-0f93fcd6f1d']) {
-                    sh """
-                        ssh ${SERVER_USER}@${SERVER_IP} '
-                        cd ${SERVER_DIR} &&
-                        docker-compose down &&
-                        docker-compose up -d --build
-                        '
-                    """
-                }
-            }
+    steps {
+        sshagent(['57c7b439-bddc-42d2-a693-0f93fcd6f1d4']) {  // Use the working credential ID
+            sh """
+                ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
+                mkdir -p ${SERVER_DIR} &&
+                echo "Deployment test successful!" > ${SERVER_DIR}/test.txt
+                '
+            """
         }
+    }
+}
     }
 }
