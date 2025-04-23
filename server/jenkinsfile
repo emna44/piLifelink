@@ -5,6 +5,8 @@ pipeline {
         SERVER_USER = 'vagrant'  
         SERVER_IP = '192.167.33.10'  // Make sure this IP is correct
         SERVER_DIR = '/home/vagrant/piLifelink'
+  SONAR_SCANNER_HOME = '/opt/sonar-scanner'
+    PATH = "${SONAR_SCANNER_HOME}/bin:${env.PATH}"
     }
 
     stages {
