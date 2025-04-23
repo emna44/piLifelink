@@ -5,8 +5,6 @@ pipeline {
         SERVER_USER = 'vagrant'  
         SERVER_IP = '192.167.33.10'  // Make sure this IP is correct
         SERVER_DIR = '/home/vagrant/piLifelink'
-        SONAR_HOST_URL   = 'http://192.168.33.10:9000'
-        SONAR_AUTH_TOKEN = credentials('sonar-token')
     }
 
     stages {
@@ -37,17 +35,19 @@ pipeline {
 
 stage('SonarQube Analysis') {
   steps {
-    script {
-      // 'scanner' must match the Name you gave in Global Tool Configuration → SonarQube Scanner
-      def scannerHome = tool 'scanner'
-
-      // 'sonar' must match the Name you gave in Manage Jenkins → Configure System → SonarQube servers
-      withSonarQubeEnv('sonar') {
-        sh "${scannerHome}/bin/sonar-scanner"
-      }
+    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+      sh '''#!/usr/bin/env bash
+        sonar-scanner \
+          -Dsonar.projectKey=nodeapp \
+          -Dsonar.sources=server \
+          -Dsonar.host.url=http://192.167.33.10:9000 \
+          -Dsonar.login="$SONAR_TOKEN" \
+          -X
+      '''
     }
   }
 }
+
 
         stage('Build React App') {
             steps {
