@@ -38,10 +38,21 @@ pipeline {
 stage('SonarQube Analysis') {
   steps {
     script {
-      def scannerHome = tool name: 'scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-      withSonarQubeEnv('sonar') {
-        sh "${scannerHome}/bin/sonar-scanner"
-      }
+      // (Optional) Verify vars
+      sh '''
+        echo "Sonar host: $SONAR_HOST_URL"
+        echo "Token prefix: ${SONAR_AUTH_TOKEN:0:4}***"
+      '''
+
+      // Run scanner with explicit host & login
+      sh """
+        sonar-scanner \
+          -Dsonar.projectKey=nodeapp \
+          -Dsonar.sources=server \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_AUTH_TOKEN \
+          -X
+      """
     }
   }
 }
