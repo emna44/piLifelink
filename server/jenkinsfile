@@ -38,25 +38,16 @@ pipeline {
 stage('SonarQube Analysis') {
   steps {
     script {
-      // (Optional) Verify vars
-      sh '''
-        echo "Sonar host: $SONAR_HOST_URL"
-        echo "Token prefix: ${SONAR_AUTH_TOKEN:0:4}***"
-      '''
+      // 'scanner' must match the Name you gave in Global Tool Configuration → SonarQube Scanner
+      def scannerHome = tool 'scanner'
 
-      // Run scanner with explicit host & login
-      sh """
-        sonar-scanner \
-          -Dsonar.projectKey=nodeapp \
-          -Dsonar.sources=server \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_AUTH_TOKEN \
-          -X
-      """
+      // 'sonar' must match the Name you gave in Manage Jenkins → Configure System → SonarQube servers
+      withSonarQubeEnv('sonar') {
+        sh "${scannerHome}/bin/sonar-scanner"
+      }
     }
   }
 }
-
 
         stage('Build React App') {
             steps {
