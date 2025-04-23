@@ -1,17 +1,35 @@
 pipeline {
     agent any
 
- environment {
-    SERVER_USER = 'vagrant'  
-    SERVER_IP = '192.167.33.10'  // Change from 192.168.1.100 to your VM's IP
-    SERVER_DIR = '/home/vagrant/piLifelink'
-}
+    environment {
+        SERVER_USER = 'vagrant'  
+        SERVER_IP = '192.167.33.10'  // Make sure this IP is correct
+        SERVER_DIR = '/home/vagrant/piLifelink'
+    }
 
     stages {
         stage('Clone Repo') {
             steps {
                 echo 'Cloning source code...'
                 checkout scm
+            }
+        }
+
+        stage('Unit Test') {
+            steps {
+                echo 'Running unit tests...'
+
+                dir('template') {
+                    echo 'Running frontend tests (React)...'
+                    sh 'npm install'
+                    sh 'npm test -- --watchAll=false' // Use --watchAll=false for CI environments
+                }
+
+                dir('server') {
+                    echo 'Running backend tests (Node)...'
+                    sh 'npm install'
+                    sh 'npm test'  // Ensure you have a test script in your server/package.json
+                }
             }
         }
 
@@ -34,18 +52,19 @@ pipeline {
 
         stage('Copy Files to Server') {
             steps {
-                sshagent(['57c7b439-bddc-42d2-a693-0f93fcd6f1d']) {
-                    // Add your scp or rsync commands here, e.g.:
-                    // sh 'scp -r build/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/frontend'
-                    // sh 'scp -r ../server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server'
+                sshagent (credentials: ['vagrant-ssh']) {
+                    // Replace echo with your actual file transfer commands
+                    // e.g., 
+                    // sh 'scp -r template/build/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/frontend'
+                    // sh 'scp -r server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server'
                     echo 'Files copied to server (add scp commands here)'
                 }
             }
         }
 
- stage('Deploy on Server') {
+        stage('Deploy on Server') {
             steps {
-                sshagent(['vagrant-ssh']) {
+                sshagent (credentials: ['vagrant-ssh']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
                         mkdir -p ${SERVER_DIR} &&
