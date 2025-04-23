@@ -33,6 +33,17 @@ pipeline {
     }
 }
 
+stage('SonarQube Analysis') {
+  steps {
+    script {
+      def scannerHome = tool name: 'scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+      withSonarQubeEnv('sonar') {
+        sh "${scannerHome}/bin/sonar-scanner"
+      }
+    }
+  }
+}
+
 
         stage('Build React App') {
             steps {
@@ -58,6 +69,8 @@ pipeline {
         }
       }
     }
+
+
 
 
     // Comment or remove this stage to skip file copying
