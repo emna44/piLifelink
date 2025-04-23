@@ -51,14 +51,18 @@ pipeline {
             }
         }
 
-        stage('Copy Files to Server') {
+         stage('Copy Files to Server') {
             steps {
                 sshagent (credentials: ['vagrant-ssh']) {
-                    // Replace echo with your actual file transfer commands
-                    // e.g., 
-                    // sh 'scp -r template/build/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/frontend'
-                    // sh 'scp -r server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server'
-                    echo 'Files copied to server (add scp commands here)'
+                    // Transfer the frontend build files
+                    sh """
+                        scp -r template/build/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/frontend
+                    """
+                    // Transfer the backend server files
+                    sh """
+                        scp -r server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server
+                    """
+                    echo 'Files copied to server.'
                 }
             }
         }
