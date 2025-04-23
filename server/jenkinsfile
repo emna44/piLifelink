@@ -58,6 +58,8 @@ pipeline {
                     // sh 'scp -r build/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/frontend'
                     // sh 'scp -r ../server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server'
                     echo 'Files copied to server (add scp commands here)'
+                    sh 'scp -r server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server'
+
                 }
             }
         }
