@@ -50,14 +50,15 @@ pipeline {
                 }
             }
         }
-
-stage('Build Docker images') {
-  steps {
-    script {
-      sh 'docker-compose build'
+  stage('Build Docker images') {
+      steps {
+        dir('server') {
+          echo "Building Docker images from server/docker-compose.yml…"
+          sh 'docker-compose build'
+        }
+      }
     }
-  }
-}
+
 
     // Comment or remove this stage to skip file copying
         // stage('Copy Files to Server') {
