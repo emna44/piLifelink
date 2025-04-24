@@ -3,12 +3,12 @@ pipeline {
 
     environment {
         SERVER_USER = 'vagrant'  
-        SERVER_IP = '192.167.33.10'  // Make sure this IP is correct
+        SERVER_IP = '192.167.33.10' // Ensure this IP is correct
         SERVER_DIR = '/home/vagrant/piLifelink'
-  SONAR_SCANNER_HOME = '/opt/sonar-scanner'
-    PATH = "${SONAR_SCANNER_HOME}/bin:${env.PATH}"
-registryCredentials = "nexus"
-registry = "192.167.33.10:8081"
+        SONAR_SCANNER_HOME = '/opt/sonar-scanner'
+        PATH = "${SONAR_SCANNER_HOME}/bin:${env.PATH}"
+        registryCredentials = "nexus"
+        registry = "192.167.33.10:8081"
     }
 
     stages {
@@ -20,38 +20,36 @@ registry = "192.167.33.10:8081"
         }
 
         stage('Unit Test') {
-    steps {
-        echo 'Running unit tests...'
+            steps {
+                echo 'Running unit tests...'
+                dir('template') {
+                    echo 'Running frontend tests (React)...'
+                    sh 'npm install'
+                    sh 'npm test -- --watchAll=false --passWithNoTests'
+                }
 
-        dir('template') {
-            echo 'Running frontend tests (React)...'
-            sh 'npm install'
-            sh 'npm test -- --watchAll=false --passWithNoTests'
+                dir('server') {
+                    echo 'Running backend tests (Node)...'
+                    sh 'npm install'
+                    sh 'npm test || echo "No backend tests defined."'
+                }
+            }
         }
 
-        dir('server') {
-            echo 'Running backend tests (Node)...'
-            sh 'npm install'
-            sh 'npm test || echo "No backend tests defined."'
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh '''#!/usr/bin/env bash
+                    sonar-scanner \
+                      -Dsonar.projectKey=nodeapp \
+                      -Dsonar.sources=server \
+                      -Dsonar.host.url=http://192.167.33.10:9000 \
+                      -Dsonar.login="$SONAR_TOKEN" \
+                      -X
+                    '''
+                }
+            }
         }
-    }
-}
-
-stage('SonarQube Analysis') {
-  steps {
-    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-      sh '''#!/usr/bin/env bash
-        sonar-scanner \
-          -Dsonar.projectKey=nodeapp \
-          -Dsonar.sources=server \
-          -Dsonar.host.url=http://192.167.33.10:9000 \
-          -Dsonar.login="$SONAR_TOKEN" \
-          -X
-      '''
-    }
-  }
-}
-
 
         stage('Build React App') {
             steps {
@@ -69,55 +67,24 @@ stage('SonarQube Analysis') {
                 }
             }
         }
-  stage('Build Docker images') {
-      steps {
-        dir('server') {
-          echo "Building Docker images from server/docker-compose.yml…"
-          sh 'docker-compose build'
+
+        stage('Build Docker images') {
+            steps {
+                dir('server') {
+                    echo "Building Docker images from server/docker-compose.yml…"
+                    sh 'docker-compose build'
+                }
+            }
         }
-      }
-    }
 
-
-
-
-    // Comment or remove this stage to skip file copying
-        // stage('Copy Files to Server') {
-        //     steps {
-        //         sshagent(['57c7b439-bddc-42d2-a693-0f93fcd6f1d']) {
-        //             // Add your scp or rsync commands here, e.g.:
-        //             // sh 'scp -r build/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/frontend'
-        //             // sh 'scp -r ../server/* ${SERVER_USER}@${SERVER_IP}:${SERVER_DIR}/server'
-        //             echo 'Files copied to server (add scp commands here)'
-        //         }
-        //     }
-        // }
-
-        // Comment or remove this stage to skip deployment
-        // stage('Deploy on Server') {
-        //     steps {
-        //         sshagent (credentials: ['57c7b439-bddc-42d2-a693-0f93fcd6f1d']) {
-        //             sh """
-        //                 ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} '
-        //                 mkdir -p ${SERVER_DIR} &&
-        //                 echo "Deployment test successful!" > ${SERVER_DIR}/test.txt
-        //                 '
-        //             """
-        //         }
-        //     }
-        // }
-
-stage('Deploy to Nexus') {
-steps{
-script {
-docker.withRegistry("http://"+registry,
-registryCredentials ) {
-sh('docker push $registry/nodemongoapp:5.0 ')
-}
-}
-}
-}
-
-
+        stage('Deploy to Nexus') {
+            steps {
+                script {
+                    docker.withRegistry("http://${registry}", registryCredentials) {
+                        sh 'docker push ${registry}/nodemongoapp:5.0'
+                    }
+                }
+            }
+        }
     }
 }
