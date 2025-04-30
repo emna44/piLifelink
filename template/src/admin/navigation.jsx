@@ -7,10 +7,11 @@ import { FilterNurse } from "./nursefilter";
 import { Patinetfilter } from "./patientfilter";
 import Ambulance from "./ambulance";
 import CreateAmbulance from "./createAmbulance";
-import Appointment from "./appointment";
 import Materiel from "./Materiel";
-import AddRoom from "./room";
+import Operation from "../medecin/Operation";
+import Room from "./room";
 import AddOperation from "./AddOperation";
+import Map from "./map";
 
 export const Navigation = () => {
   const [selectedMenu, setSelectedMenu] = useState("dashboard");
@@ -63,14 +64,18 @@ export const Navigation = () => {
         return <Patinetfilter />;
       case "nurse":
         return <FilterNurse />;
-      case "material":
-        return <Materiel />;
-      case "operation":
-        return <AddOperation />;
-      case "appointment":
-        return <Appointment />;
+        case "material":
+          return <Materiel/>;
+         case "operation":
+          return <AddOperation></AddOperation>
       case "room":
-        return <AddRoom />;
+        return <Room></Room>;
+        case "Map":
+          return (
+            <div style={{ height: "calc(100vh - 40px)", width: "100%" }}>
+              <Map />
+            </div>
+          );
       case "ambulance":
         return (
           <div>
@@ -127,7 +132,8 @@ export const Navigation = () => {
           <li><button onClick={() => setSelectedMenu("nurse")} style={linkStyle}>Nurse</button></li>
           <li><button onClick={() => setSelectedMenu("material")} style={linkStyle}>Material</button></li>
           <li><button onClick={() => setSelectedMenu("operation")} style={linkStyle}>Operation</button></li>
-          <li><button onClick={() => setSelectedMenu("appointment")} style={linkStyle}>Appointment</button></li>
+          <li><button onClick={() => setSelectedMenu("Map")} style={linkStyle}>Emergency Map</button></li>
+
           <li><button onClick={() => setSelectedMenu("room")} style={linkStyle}>Room</button></li>
           <li><button onClick={() => setSelectedMenu("ambulance")} style={linkStyle}>Ambulance Staff</button></li>
           <li><button style={logoutStyle} onClick={Logout}>Log out</button></li>

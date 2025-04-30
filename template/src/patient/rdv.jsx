@@ -6,23 +6,22 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import DateTimePicker from 'react-datetime-picker';
 import './rdv.css';
-import Popping from './popping'; // Import du composant modal
 
 const localizer = momentLocalizer(moment);
 
 const Rdv = () => {
-  const { idMedecin, idPatient } = useParams();
+  const { idMedecin } = useParams();
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [requestMessage, setRequestMessage] = useState('');
-  
-  const [open, setOpen] = useState(false);           // État pour la modale
-  const [currentEvent, setCurrentEvent] = useState(null); // État pour l'événement sélectionné
+  const userId = localStorage.getItem("userId"); // ID du médecin connecté
 
   const fetchData = async () => {
     try {
       const appointmentsResponse = await axios.get(`http://localhost:3001/appointments/medecin/${idMedecin}`);
+
+      // Vérifie que c'est un tableau
       const appointments = Array.isArray(appointmentsResponse.data) ? appointmentsResponse.data : [];
 
       const formattedAppointments = appointments.map(appt => ({
@@ -31,7 +30,6 @@ const Rdv = () => {
           : 'Rendez-vous',
         start: new Date(appt.startTime),
         end: new Date(appt.endTime),
-        description: appt.description || 'Pas de description',
       }));
 
       const operationsResponse = await axios.get(`http://localhost:3001/doctor/${idMedecin}`);
@@ -41,7 +39,6 @@ const Rdv = () => {
         title: `Opération : ${op.description}`,
         start: new Date(op.startTime),
         end: new Date(op.endTime),
-        description: op.description,
       }));
 
       setEvents([...formattedAppointments, ...formattedOperations]);
@@ -58,11 +55,6 @@ const Rdv = () => {
     setSelectedDate(slotInfo.start);
     setSelectedTime(slotInfo.start);
     setRequestMessage('');
-  };
-
-  const handleSelectEvent = (event) => {
-    setCurrentEvent(event);
-    setOpen(true);
   };
 
   const isSlotAvailable = (start, end) => {
@@ -86,24 +78,22 @@ const Rdv = () => {
     const startTime = selectedTime;
     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
 
-    // Ne pas autoriser une date passée
     if (startTime < new Date()) {
       setRequestMessage("Impossible de prendre un rendez-vous dans le passé.");
       return;
     }
 
-    // Ne pas autoriser un créneau déjà pris
     if (!isSlotAvailable(startTime.getTime(), endTime.getTime())) {
       setRequestMessage("Ce créneau est déjà occupé. Veuillez en choisir un autre.");
       return;
     }
 
     try {
-      await axios.post(`http://localhost:3001/appointments`, {
+      const response = await axios.post(`http://localhost:3001/appointments`, {
         startTime,
         endTime,
         status: 'pending',
-        patient: idPatient,
+        patient: userId, // 🔁 À remplacer dynamiquement avec l'utilisateur connecté
         doctor: idMedecin,
       });
 
@@ -118,13 +108,6 @@ const Rdv = () => {
   return (
     <div className="container">
       <h2>Prendre rendez-vous avec un médecin</h2>
-
-      <Popping
-        open={open}
-        handleClose={() => setOpen(false)}
-        event={currentEvent}
-      />
-
       <div className="calendar-container">
         <h3>Planning du médecin</h3>
         <Calendar
@@ -135,7 +118,6 @@ const Rdv = () => {
           style={{ height: 500 }}
           selectable
           onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent} // Clic sur un event = ouvrir modal
         />
 
         {selectedDate && selectedTime && (
@@ -145,7 +127,7 @@ const Rdv = () => {
               onChange={setSelectedTime}
               value={selectedTime}
               format="y-MM-dd HH:mm:ss"
-              minDate={new Date()} // Interdit la sélection d'une date dans le passé
+              minDate={new Date()}
             />
             <button onClick={handleRequestAppointment}>Confirmer le rendez-vous</button>
           </div>

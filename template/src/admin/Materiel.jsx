@@ -40,9 +40,14 @@ const Materiel = () => {
     };
 
     const handleDelete = async (id) => {
-        await axios.delete(`http://localhost:3001/materials/${id}`);
-        fetchMaterials();
+        try {
+            await axios.delete(`http://localhost:3001/materials/${id}`);
+            fetchMaterials(); // Rechargez les matériaux après la suppression
+        } catch (error) {
+            console.error('Error deleting material:', error);
+        }
     };
+    
 
     return (
         <div className="container">

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Ajoutez useNavigate
 import axios from 'axios';
 
 const MesRdv = () => {
-  const { userId } = useParams(); // Récupérer l'ID du patient depuis les paramètres
-  const [appointments, setAppointments] = useState([]); // Stocker les rendez-vous récupérés
-  const [loading, setLoading] = useState(true); // Gérer l'état de chargement
+  const { userId } = useParams(); 
+  const [appointments, setAppointments] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); 
 
-  // Récupérer les rendez-vous du patient lors du chargement du composant
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -29,6 +29,11 @@ const MesRdv = () => {
   
     fetchAppointments();
   }, [userId]);
+
+  const handleNavigate = () => {
+    // Redirige vers la page historique du patient
+    navigate(`/${userId}/historique`);
+  };
 
   if (loading) {
     return <div>Chargement des rendez-vous...</div>;
@@ -63,6 +68,27 @@ const MesRdv = () => {
           ))}
         </div>
       )}
+
+      {/* Boutons pour naviguer */}
+      <div style={{ marginTop: '20px' }}>
+        <button
+          onClick={handleNavigate}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginRight: '10px',
+          }}
+        >
+          Voir l'historique
+        </button>
+
+        {/* Ajouter un autre bouton avec une fonctionnalité différente */}
+        
+      </div>
     </div>
   );
 };

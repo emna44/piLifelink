@@ -51,7 +51,7 @@ const RoomList = () => {
           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
           onClick={() => navigate("/room")}
         >
-          + Ajouter une salle
+          + Add room
         </button>
       </div>
 
@@ -69,9 +69,6 @@ const RoomList = () => {
               ) : (
                 <span className="text-red-600 font-bold">Occupée</span>
               )}
-            </p>
-            <p className="mb-3">
-              <strong>Patient:</strong> {room.patient?.name || room.patient || "Aucun"}
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-2 mt-3">

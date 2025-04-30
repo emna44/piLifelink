@@ -1,90 +1,222 @@
-/* RoomList.css */
+/* roomList.css */
 
-.room-list-container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 30px 20px;
-  }
-  
-  .room-list-title {
-    text-align: center;
-    font-size: 26px;
-    font-weight: bold;
-    margin-bottom: 30px;
-  }
-  
-  .room-cards-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+/* General page container */
+.page-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Titles */
+.title-main {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1f2937;
+}
+
+.title-section {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #2563eb;
+}
+
+/* Form section */
+.form-container {
+  background: white;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.form-container label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-container input,
+.form-container select {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-container input:focus,
+.form-container select:focus {
+  border-color: #3498db;
+}
+
+/* Buttons */
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  background: #3498db;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  background: #2980b9;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-secondary:hover {
+  background: #2980b9;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* Room card */
+.room-card {
+  background: white;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.room-card:hover {
+  transform: translateY(-5px);
+}
+
+.room-card p {
+  margin-bottom: 0.5rem;
+}
+
+/* Status colors */
+.status-available {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.status-occupied {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+/* Search and filter section */
+.search-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .search-filter-container {
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
   }
-  
-  .room-card {
-    background: #fff;
-    border-radius: 20px;
-    padding: 20px;
-    width: 250px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-    transition: 0.3s ease;
-    text-align: center;
+}
+
+.search-filter-container input,
+.search-filter-container select {
+  flex: 1;
+}
+
+/* Messages */
+.success-message {
+  text-align: center;
+  color: #22c55e;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  text-align: center;
+  color: #ef4444;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Recherche et filtre container */
+.search-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Champ de recherche */
+.search-filter-container input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.search-filter-container input[type="text"]:focus {
+  border-color: #007bff;
+}
+
+/* Select de filtre */
+.search-filter-container select {
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  background-color: white;
+  transition: border-color 0.3s;
+}
+
+.search-filter-container select:focus {
+  border-color: #007bff;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .search-filter-container {
+    flex-direction: row;
+    align-items: center;
   }
-  
-  .room-card:hover {
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+
+  .search-filter-container input[type="text"],
+  .search-filter-container select {
+    width: 50%;
   }
-  
-  .room-card h3 {
-    font-size: 20px;
-    margin-bottom: 12px;
-  }
-  
-  .room-card p {
-    font-size: 14px;
-    margin: 6px 0;
-  }
-  
-  .room-status {
-    font-weight: bold;
-  }
-  
-  .room-status.available {
-    color: green;
-  }
-  
-  .room-status.occupied {
-    color: red;
-  }
-  
-  .room-actions {
-    margin-top: 15px;
-  }
-  
-  .delete-btn,
-  .edit-btn {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .edit-btn {
-    background-color: #facc15;
-    margin-right: 10px;
-  }
-  
-  .add-room-btn {
-    background-color: #22c55e;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 16px;
-    margin-bottom: 20px;
-    float: right;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
+}

@@ -41,19 +41,19 @@ const Ambulance = () => {
       alert(`Erreur : ${error.message}`);
     }
   };
-  const handleStatusChange = async (userId, newStatus) => {
+  const handleStatusChange = async (userId, newstatus) => {
     try {
       const response = await fetch(`http://localhost:3001/ambulances/${userId}`, { 
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newStatus }),
+        body: JSON.stringify({ status: newstatus }),
       }); 
 
       if (!response.ok) throw new Error("Erreur lors de la mise à jour du rôle");
 
       setAmbulances((prevAmbulances) =>
       prevAmbulances.map((ambulance) =>
-          ambulance._id === userId ? { ...ambulance, status: newStatus } : ambulance
+          ambulance._id === userId ? { ...ambulance, status: newstatus } : ambulance
         )
       );
     } catch (error) {

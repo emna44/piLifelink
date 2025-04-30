@@ -1,9 +1,14 @@
-import Navigation from "./Navigation";
-
-export default function Doctor() {
-    return (
+import { Navigation } from "./navigation";
+import { Homepage } from "./homepage";
+export default function Pation(){
+    return(
+        
         <div>
-            <Navigation></Navigation>
+             <Navigation>
+             </Navigation>
+                <Homepage>
+                </Homepage> 
         </div>
+       
     )
 }

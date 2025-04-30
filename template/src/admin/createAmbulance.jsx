@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaCar, FaPhoneAlt, FaMapMarkerAlt, FaRegFlag } from "react-icons/fa";
-import "./ambulance.css"; 
+import "./createAmbulance.css";
 
 const CreateAmbulance = () => {
   const [model, setModel] = useState("");
@@ -12,6 +12,12 @@ const CreateAmbulance = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation des champs
+    if (!model || !serie || !contact || !location) {
+      setMessage("❌ Tous les champs sont requis.");
+      return;
+    }
 
     const ambulanceData = { model, serie, contact, location, status };
 
@@ -46,71 +52,67 @@ const CreateAmbulance = () => {
       <div className="wrapper">
         <h1>Create Ambulance</h1>
         {message && <p className="message">{message}</p>}
-        <div className="user-grid">
-          <div className="user-card">
-            <form onSubmit={handleSubmit}>
-              <div className="input-box">
-                <input
-                  type="text"
-                  placeholder="Model"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  required
-                />
-                <FaCar className="icon" />
-              </div>
-
-              <div className="input-box">
-                <input
-                  type="text"
-                  placeholder="Serie"
-                  value={serie}
-                  onChange={(e) => setSerie(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="input-box">
-                <input
-                  type="text"
-                  placeholder="Contact"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  required
-                />
-                <FaPhoneAlt className="icon" />
-              </div>
-
-              <div className="input-box">
-                <input
-                  type="text"
-                  placeholder="Location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  required
-                />
-                <FaMapMarkerAlt className="icon" />
-              </div>
-
-              <div className="input-box">
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  required
-                  className="role-select"
-                >
-                  <option value="AVAILABLE">Available</option>
-                  <option value="BUSY">Busy</option>
-                </select>
-                <FaRegFlag className="icon" />
-              </div>
-
-              <button type="submit" className="btn-primary">
-                Create Ambulance
-              </button>
-            </form>
+        <form onSubmit={handleSubmit}>
+          <div className="input-box">
+            <input
+              type="text"
+              placeholder="Model"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              required
+            />
+            <FaCar className="icon" />
           </div>
-        </div>
+
+          <div className="input-box">
+            <input
+              type="text"
+              placeholder="Serie"
+              value={serie}
+              onChange={(e) => setSerie(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="input-box">
+            <input
+              type="text"
+              placeholder="Contact"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              required
+            />
+            <FaPhoneAlt className="icon" />
+          </div>
+
+          <div className="input-box">
+            <input
+              type="text"
+              placeholder="Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+            />
+            <FaMapMarkerAlt className="icon" />
+          </div>
+
+          <div className="input-box">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              required
+              className="role-select"
+            >
+              <option value="AVAILABLE">Available</option>
+              <option value="BUSY">Busy</option>
+            </select>
+            <FaRegFlag className="icon" />
+          </div>
+
+          <button type="submit" className="btn-primary">
+            Create Ambulance
+          </button>
+        </form>
       </div>
     </div>
   );

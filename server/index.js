@@ -1,28 +1,45 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const UserModel = require("./models/User");
-const Ambulance = require("./models/Ambulance");
-const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
-const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
+const express = require("express"); // Importation d'Express
+const mongoose = require("mongoose"); // Pour interagir avec MongoDB
+const cors = require("cors"); // Pour gérer les requêtes CORS
+const cookieParser = require("cookie-parser"); // Pour parser les cookies
+const jwt = require("jsonwebtoken"); // Pour gérer les tokens JWT
+const nodemailer = require("nodemailer"); // Pour envoyer des emails
+const bcrypt = require("bcrypt"); // Pour le hashing des mots de passe
+const path = require("path"); // Pour gérer les chemins de fichiers
+const multer=require ('multer');
+
 const { OAuth2Client } = require("google-auth-library");
+
+const locationModel = require("./models/locationEmergency")
+
+// Importation des modèles (ajuste les chemins en fonction de ton projet)
+const UserModel = require("./models/User");
 const AmbulanceModel = require("./models/Ambulance");
 const MaterialModel = require("./models/Material");
-const AppointmentModel = require('./models/Appointment');
-const Room = require("./models/Room");
-const OperationModel = require('./models/Operation');
-const { ObjectId } = require('mongoose').Types; // Import ObjectId
-const ComplaintModel = require('./models/Complaint'); // Add this if it's missing
+const AppointmentModel = require("./models/Appointment");
+const RoomModel = require("./models/Room");
+const Room = require('./models/Room'); 
+const OperationModel = require("./models/Operation");
+const ComplaintModel = require("./models/Complaint");
 
+// Création de l'application Express
 const app = express();
+
+// Middleware pour parser le JSON dans les requêtes entrantes
 app.use(express.json());
+
+// Middleware pour gérer les cookies
+app.use(cookieParser());
+
+// Configuration CORS pour autoriser les requêtes de certains domaines
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+  origin: ["http://localhost:5173", "http://localhost:3000"], // Tu peux ajouter d'autres domaines ici
+  methods: ["GET", "POST", "PUT", "DELETE"], // Méthodes autorisées
+  credentials: true, // Pour gérer les cookies
 }));
+
+// Servir les fichiers statiques (par exemple images)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const router = express.Router();
 const client = new OAuth2Client("300857414061-8ff3ed18qghlb7r1bcqom4a52ki58ch0.apps.googleusercontent.com");
@@ -45,6 +62,33 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     }
 });
+app.use('/images', express.static('public/Images'));
+app.use('/files', express.static('public/Files'));
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      // Spécifier le dossier de destination des fichiers téléchargés
+      cb(null, 'public/Images');
+    },
+    filename: (req, file, cb) => {
+      // Renommer les fichiers en utilisant un timestamp pour éviter les conflits
+      cb(null, Date.now() + path.extname(file.originalname));  // Utilise l'extension du fichier d'origine
+    }
+  });
+  
+  // Middleware Multer pour gérer l'upload des fichiers (max 10 fichiers)
+  const upload = multer({ storage: storage });
+  const storage1 = multer.diskStorage({
+    destination: (req, file, cb) => {
+      // Spécifier le dossier de destination des fichiers téléchargés
+      cb(null, 'public/Files');
+    },
+    filename: (req, file, cb) => {
+      // Renommer les fichiers en utilisant un timestamp pour éviter les conflits
+      cb(null, Date.now() + path.extname(file.originalname));  // Utilise l'extension du fichier d'origine
+    }
+  });
+  const upload1 = multer({ storage: storage1 });
 
 app.get("/appointments", async (req, res) => {
     try {
@@ -59,46 +103,95 @@ app.get("/appointments", async (req, res) => {
     }
 });
 
-app.post("/appointments", async (req, res) => {
+
+app.get("/locations", async (req, res) => { 
     try {
-      const { startTime, endTime, doctor, patient } = req.body;
+        // Récupérer uniquement lat et lng des localisations
+        const locations = await locationModel.find({}, "lat lng");
+
+        if (locations.length === 0) {
+            // Si aucune localisation n'est trouvée
+            return res.status(404).json({ message: "Aucune localisation trouvée" });
+        }
+
+        // Envoi des données au client
+        res.status(200).json(locations);
+    } catch (error) {
+        // Retourner un message d'erreur spécifique
+        console.error("Erreur lors de la récupération des localisations:", error.message);
+        res.status(500).json({ error: "Erreur interne du serveur. Veuillez réessayer plus tard." });
+    }
+});
+
+app.post("/api/location", async (req, res) => {
+    try {
+      const { lat, lng } = req.body;
   
-      const newAppointment = new AppointmentModel({
-        startTime,
-        endTime,
-        status: 'pending',
-        doctor,
-        patient,
-      });
-  
-      const savedAppointment = await newAppointment.save();
-  
-      const doctorData = await UserModel.findById(doctor);
-      const patientData = await UserModel.findById(patient);
-  
-      if (doctorData && doctorData.email) {
-        await transporter.sendMail({
-          from: '"Système de Rendez-vous 👨‍⚕️" <saif.meddeb.52@gmail.com>',
-          to: doctorData.email,
-          subject: "Nouveau Rendez-vous Réservé",
-          html: `
-            <p>Bonjour Dr. ${doctorData.name},</p>
-            <p>Un nouveau rendez-vous a été réservé par le patient <strong>${patientData.name} ${patientData.lastName}</strong>.</p>
-            <p><strong>Date :</strong> ${new Date(startTime).toLocaleString()}</p>
-            <p>Merci de vérifier votre planning.</p>
-          `
-        });
-  
-        console.log("📧 Email envoyé au médecin:", doctorData.email);
+      if (lat === undefined || lng === undefined) {
+        return res.status(400).json({ message: "Latitude et longitude sont requises" });
       }
   
-      res.status(201).json(savedAppointment);
+      const newLocation = new locationModel({ lat, lng });
+      await newLocation.save();
+  
+      res.status(201).json({ message: "Localisation enregistrée avec succès", location: newLocation });
     } catch (error) {
-      console.error("❌ Erreur lors de la création du rendez-vous :", error.message);
-      res.status(500).json({ message: "Erreur lors de la création du rendez-vous", error: error.message });
+      console.error("Erreur lors de l'enregistrement de la localisation:", error);
+      res.status(500).json({ message: "Erreur serveur" });
     }
   });
+  
 
+// Route pour ajouter un rendez-vous
+app.post("/appointments", async (req, res) => {
+    try {
+        const { startTime, endTime, status, patient, doctor } = req.body;
+
+        if (!startTime || !endTime || !status || !patient || !doctor) {
+            return res.status(400).json({ message: "Tous les champs requis ne sont pas fournis" });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(patient) || !mongoose.Types.ObjectId.isValid(doctor)) {
+            return res.status(400).json({ message: "ID patient ou médecin invalide" });
+        }
+
+        const newAppointment = new AppointmentModel({
+            startTime,
+            endTime,
+            status,
+            patient,
+            doctor
+        });
+
+        await newAppointment.save();
+        res.status(201).json({ message: "Rendez-vous ajouté avec succès", appointment: newAppointment });
+    } catch (error) {
+        console.error("Erreur lors de l'ajout du rendez-vous:", error);
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+});
+app.put("/api/patients/:id/status", async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+  
+    try {
+      const updatedPatient = await UserModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
+  
+      if (!updatedPatient) {
+        return res.status(404).json({ message: "Patient non trouvé." });
+      }
+  
+      res.status(200).json(updatedPatient);
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour du statut :", err);
+      res.status(500).json({ message: "Erreur serveur." });
+    }
+  });
+  
 app.get("/appointments/medecin/:doctorId", async (req, res) => {
     try {
         const appointments = await AppointmentModel.find({ doctor: req.params.doctorId })
@@ -110,6 +203,154 @@ app.get("/appointments/medecin/:doctorId", async (req, res) => {
         res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
 });
+app.put("/api/patients/:id/images", upload.array('images', 10), async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      // Recherche du patient
+      const patient = await UserModel.findById(id);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient non trouvé." });
+      }
+      const imageFiles = req.files.map(file => file.filename);  // Récupère les noms des fichiers (nom modifié par Multer)
+
+      // Ajouter les images au tableau des images
+      patient.images = [...patient.images, ...imageFiles];  // Fusionner les tableaux des images existantes et nouvelles
+      
+      // Sauvegarder les modifications
+      const updatedPatient = await patient.save();
+      
+      res.status(200).json(updatedPatient);  // Retourner le patient mis à jour
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour des images :", err);
+      res.status(500).json({ message: "Erreur serveur." });
+    }
+  });
+  
+  
+  app.put("/api/patients/:id/files", async (req, res) => {
+    const { id } = req.params;
+    const { files } = req.body;  // Tableau des fichiers à ajouter (ici on suppose des URLs ou chemins vers les fichiers)
+  
+    try {
+      // Recherche du patient
+      const patient = await UserModel.findById(id);
+      
+      if (!patient) {
+        return res.status(404).json({ message: "Patient non trouvé." });
+      }
+  
+      // Ajouter les fichiers PDF au tableau des fichiers
+      patient.files = [...patient.files, ...files];  // Fusionner les tableaux des fichiers existants et nouveaux
+      
+      // Sauvegarder les modifications
+      const updatedPatient = await patient.save();
+      
+      res.status(200).json(updatedPatient);  // Retourner le patient mis à jour
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour des fichiers PDF :", err);
+      res.status(500).json({ message: "Erreur serveur." });
+    }
+  
+
+  });
+  
+  app.get('/api/image', async (req, res) => {
+    const imagePath = req.query.path;
+  
+    try {
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        // 1. Si c'est une URL externe
+        const response = await axios.get(imagePath, { responseType: 'stream' });
+        response.data.pipe(res);
+      } else {
+        // 2. Sinon, c'est un chemin local
+        const localPath = path.resolve(imagePath); // tu peux adapter ici si besoin
+        if (fs.existsSync(localPath)) {
+          res.sendFile(localPath);
+        } else {
+          res.status(404).send('Image not found.');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error loading image.');
+    }
+  });
+  app.get('/api/users/:userId/fichiers', async (req, res) => {
+    const { userId } = req.params;
+  
+    try {
+      // Recherche de l'utilisateur par ID
+      const user = await UserModel.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+  
+      // Retourner les fichiers PDF et les images associés à cet utilisateur
+      res.status(200).json({
+        files: user.files,  // Tableau des fichiers PDF
+        images: user.images  // Tableau des images
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des fichiers:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  });
+
+
+
+  
+  
+app.get('/api/patients/medecin', async (req, res) => {
+    try {
+      let { ids } = req.query;
+  
+      if (!ids) {
+        return res.status(400).json({ message: 'Patient IDs are required in query parameter ?ids=' });
+      }
+  
+      // Si un seul id est passé, convertir en tableau
+      if (!Array.isArray(ids)) {
+        ids = ids.split(',');
+      }
+  
+      const patients = await UserModel.find({
+        _id: { $in: ids }
+      }).select('name lastName email phone status');
+  
+      if (patients.length === 0) {
+        return res.status(404).json({ message: 'No patients found' });
+      }
+  
+      res.json(patients);
+    } catch (err) {
+      res.status(500).json({ message: 'Error fetching patients', error: err.message });
+    }
+  });
+  
+  app.get("/appointments/medecin/patients/:userId", async (req, res) => {
+    try {
+      const appointments = await AppointmentModel.find({ doctor: req.params.userId })
+        .sort({ startTime: 1 });
+
+      // Extraire les IDs des patients
+      const patientIds = appointments.map((appointment) => appointment.patient.toString());
+
+      // Éliminer les doublons en utilisant un Set (pas de redondance)
+      const uniquePatientIds = [...new Set(patientIds)];
+
+      res.status(200).json(uniquePatientIds);  // Retourner les IDs uniques des patients
+    } catch (error) {
+      console.error(error);  // Afficher l'erreur dans le serveur pour plus de détails
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+});
+
+  
+  
 
 app.get('/medecin/pending/:doctorId', async (req, res) => {
     const { doctorId } = req.params;
@@ -133,115 +374,62 @@ app.get('/medecin/pending/:doctorId', async (req, res) => {
 
 app.put("/appointments/:id/status", async (req, res) => {
     try {
-      const { id } = req.params;
-      const { status } = req.body;
-  
-      // Récupérer le rendez-vous avec les informations du patient et du médecin
-      const appointment = await AppointmentModel.findById(id);
-  
-      if (!appointment) {
-        return res.status(404).json({ message: "Rendez-vous non trouvé" });
-      }
-  
-      // Récupérer le patient et le médecin via leurs IDs
-      const patient = await UserModel.findById(appointment.patient);
-      const doctor = await UserModel.findById(appointment.doctor);
-  
-      if (!patient || !doctor) {
-        return res.status(404).json({ message: "Patient ou médecin introuvable" });
-      }
-  
-      // Mettre à jour le statut du rendez-vous
-      appointment.status = status;
-      await appointment.save();
-  
-      // Préparer les variables pour l'email
-      let subject = "";
-      let text = "";
-      const patientName = patient.name;
-      const doctorName = doctor.name;
-      const date = new Date(appointment.startTime).toLocaleString();
-  
-      // Créer le texte de l'email en fonction du statut
-      if (status === "confirmed") {
-        subject = "Confirmation de rendez-vous";
-        text = `Bonjour ${patientName},\n\nVotre rendez-vous avec Dr. ${doctorName} a été CONFIRMÉ pour le ${date}.\n\nMerci.`;
-      } else if (status === "cancelled") {
-        subject = "Annulation de rendez-vous";
-        text = `Bonjour ${patientName},\n\nNous vous informons que votre rendez-vous avec Dr. ${doctorName} prévu le ${date} a été ANNULÉ.\n\nMerci de votre compréhension.`;
-      }
-  
-      
-      if (patient?.email) {
-        try {
-          await transporter.sendMail({
-            from: `"Cabinet Médical" <saif.meddeb.52@gmail.com>`, 
-            to: patient.email, 
-            subject,
-            text,
-          });
-  
-          res.json({
-            message: "Statut mis à jour et email envoyé",
-            appointment,
-          });
-        } catch (mailError) {
-          console.error("Erreur lors de l'envoi de l'email :", mailError);
-          res.status(500).json({
-            message: "Statut mis à jour mais l'email n'a pas pu être envoyé",
-            appointment,
-            error: mailError.message,
-          });
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const updatedAppointment = await AppointmentModel.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedAppointment) {
+            return res.status(404).json({ message: "Rendez-vous non trouvé" });
         }
-      } else {
-        res.json({
-          message: "Statut mis à jour, mais l'email du patient est introuvable",
-          appointment,
-        });
-      }
+
+        res.json(updatedAppointment);
     } catch (error) {
-      console.error("Erreur lors de l'update :", error);
-      res.status(500).json({ message: "Erreur serveur", error: error.message });
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
-  });
-  
-  app.put("/appointments/:id/cancel", async (req, res) => {
+});
+
+// Update appointment status
+app.put("/appointments/:id/status", async (req, res) => {
     try {
-      const appointment = await AppointmentModel.findById(req.params.id);
-  
-      if (!appointment) {
-        return res.status(404).json({ message: "Rendez-vous non trouvé" });
-      }
-  
-      const patient = await UserModel.findById(appointment.patient);
-      const doctor = await UserModel.findById(appointment.doctor);
-  
-      if (!patient || !doctor) {
-        return res.status(404).json({ message: "Patient ou médecin introuvable" });
-      }
-  
-      appointment.status = "canceled";
-      await appointment.save();
-  
-      if (patient.email) {
-        const subject = "Annulation de votre rendez-vous";
-        const date = new Date(appointment.startTime).toLocaleString();
-        const text = `Bonjour ${patient.name},\n\nVotre rendez-vous avec Dr. ${doctor.name} prévu le ${date} a été ANNULÉ.\n\nMerci de votre compréhension.`;
-  
-        await transporter.sendMail({
-          from: `"Cabinet Médical" <saif.meddeb.52@gmail.com>`,
-          to: patient.email,
-          subject,
-          text,
-        });
-      }
-  
-      res.json({ message: "Statut mis à jour et email envoyé", appointment });
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const updatedAppointment = await AppointmentModel.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedAppointment) {
+            return res.status(404).json({ message: "Rendez-vous non trouvé" });
+        }
+
+        res.json(updatedAppointment);
     } catch (error) {
-      console.error("Erreur lors de l'annulation :", error);
-      res.status(500).json({ message: "Erreur serveur", error: error.message });
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
-  });
+});
+
+// Delete appointment
+app.delete("/appointments/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedAppointment = await AppointmentModel.findByIdAndDelete(id);
+
+        if (!deletedAppointment) {
+            return res.status(404).json({ message: "Rendez-vous non trouvé" });
+        }
+
+        res.json({ message: "Rendez-vous supprimé avec succès", deletedAppointment });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+});
 
 app.get("/appointments/doctor/:doctorId", async (req, res) => {
     try {
@@ -597,12 +785,12 @@ app.post("/createAmbulance", async (req, res) => {
     try {
         const { model, serie, contact, location } = req.body;
 
-        const existingAmbulance = await Ambulance.findOne({ serie });
+        const existingAmbulance = await AmbulanceModel.findOne({ serie });
         if (existingAmbulance) {
             return res.status(400).json({ message: "Ambulance with this serie already exists" });
         }
 
-        const newAmbulance = await Ambulance.create({
+        const newAmbulance = await AmbulanceModel.create({
             model,
             serie,
             contact,
@@ -620,24 +808,24 @@ app.post("/createAmbulance", async (req, res) => {
 
 app.get('/api/rooms', async (req, res) => {
     try {
-      const rooms = await Room.find(); 
+      const rooms = await RoomModel.find(); 
       res.status(200).json(rooms);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Erreur lors de la récupération des salles' });
     }
-});
+  });
 
-app.post("/addroom", async (req, res) => {
+  app.post("/addroom", async (req, res) => {
     try {
         const { roomNumber, description } = req.body;
 
-        const existingRoom = await Room.findOne({ roomNumber });
+        const existingRoom = await RoomModel.findOne({ roomNumber });
         if (existingRoom) {
             return res.status(400).json({ message: "Room with this number already exists" });
         }
 
-        const newRoom = await Room.create({
+        const newRoom = await RoomModel.create({
             roomNumber,
             description
         });
@@ -653,30 +841,29 @@ app.post("/addroom", async (req, res) => {
 
 app.post("/room", async (req, res) => {
     try {
-      const { roomNumber, availability, patient } = req.body;
+      const { roomNumber, availability } = req.body;
       const newRoom = await Room.create({
         roomNumber,
         availability,
-        patient,
       });
       res.status(201).json({ message: "Salle créée avec succès", room: newRoom });
     } catch (error) {
       console.error("Erreur lors de la création de la salle :", error);
       res.status(500).json({ message: "Erreur serveur lors de la création de la salle", error });
     }
-});
+  });
   
-app.get("/room", async (req, res) => {
+  app.get("/room", async (req, res) => {
     try {
-      const rooms = await Room.find();
+      const rooms = await Room.find(); // Optionnel : pour avoir les infos du patient
       res.status(200).json(rooms);
     } catch (error) {
       console.error("Erreur lors de la récupération des salles :", error);
       res.status(500).json({ message: "Erreur serveur", error });
     }
-});
+  });
   
-app.delete("/room/:id", async (req, res) => {
+  app.delete("/room/:id", async (req, res) => {
     try {
       const deletedRoom = await Room.findByIdAndDelete(req.params.id);
       if (!deletedRoom) {
@@ -686,9 +873,9 @@ app.delete("/room/:id", async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: "Erreur serveur", error });
     }
-});
+  });
   
-app.put("/room/:id", async (req, res) => {
+  app.put("/room/:id", async (req, res) => {
     try {
       const updatedRoom = await Room.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
@@ -697,11 +884,12 @@ app.put("/room/:id", async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: "Erreur lors de la mise à jour", err });
     }
-});
+  });
+
 
 app.get("/ambulances", async (req, res) => {
     try {
-        const ambulances = await Ambulance.find({}, "id model serie contact location status");
+        const ambulances = await AmbulanceModel.find({}, "id model serie contact location status");
         if (!ambulances.length) {
             return res.status(404).json({ message: "Aucune ambulance trouvée" });
         }
@@ -794,6 +982,7 @@ app.get("/materials", async (req, res) => {
     }
 });
 
+
 // Get a material by ID
 app.get("/materials/:id", async (req, res) => {
     try {
@@ -824,9 +1013,12 @@ app.put("/materials/:id", async (req, res) => {
     }
 });
 
+// Delete a material by ID
 app.delete("/materials/:id", async (req, res) => {
     try {
         const { id } = req.params;
+        console.log("ID à supprimer :", id); // Ajoutez ce log
+
         const deletedMaterial = await MaterialModel.findByIdAndDelete(id);
 
         if (!deletedMaterial) {
@@ -839,6 +1031,39 @@ app.delete("/materials/:id", async (req, res) => {
     }
 });
 
+app.get("/api/check-conflict", async (req, res) => {
+    const { start, end, doctorId, patientId } = req.query;
+  
+    try {
+      const appointments = await AppointmentModel.find({
+        $or: [
+          { doctor: doctorId },
+          { patient: patientId }
+        ],
+        $and: [
+          { startTime: { $lt: end } },
+          { endTime: { $gt: start } }
+        ]
+      });
+  
+      const operations = await OperationModel.find({
+        $or: [
+          { doctor: doctorId },
+          { patient: patientId }
+        ],
+        $and: [
+          { startTime: { $lt: end } },
+          { endTime: { $gt: start } }
+        ]
+      });
+  
+      const conflict = appointments.length > 0 || operations.length > 0;
+      res.json({ conflict });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
 app.post('/api/operations', async (req, res) => {
     try {
         const { startTime, endTime, description, patient, doctor, room } = req.body;
@@ -849,7 +1074,7 @@ app.post('/api/operations', async (req, res) => {
 
         const patientExists = await UserModel.findById(patient);
         const doctorExists = await UserModel.findById(doctor);
-        const roomExists = await Room.findById(room);
+        const roomExists = await RoomModel.findById(room);
 
         if (!patientExists || !doctorExists || !roomExists) {
             return res.status(400).json({ message: "Le patient, le médecin ou la salle n'existent pas" });
@@ -899,7 +1124,7 @@ app.get('/patient/:patientId', async (req, res) => {
 
 app.get('/api/rooms', async (req, res) => {
     try {
-        const rooms = await Room.find();
+        const rooms = await RoomModel.find();
         res.status(200).json(rooms);
     } catch (error) {
         console.error(error);
@@ -911,7 +1136,8 @@ app.get('/api/medecins/:specialite', async (req, res) => {
     try {
         const { specialite } = req.params;
 
-        const medecins = await UserModel.find({ speciality: specialite ,role:"DOCTOR"});
+        // Trouver les médecins ayant cette spécialité
+        const medecins = await UserModel.find({ speciality: specialite });
 
         if (!medecins || medecins.length === 0) {
             return res.status(404).json({ message: 'Aucun médecin trouvé pour cette spécialité' });
@@ -942,27 +1168,54 @@ app.put("/doctor/:id/speciality", async (req, res) => {
 });
 
 app.post("/api/complaints", async (req, res) => {
-    try {
-        const { description, patientId } = req.body;
-
-        if (!description || !patientId) {
-            return res.status(400).json({ message: "Description and patient ID are required." });
-        }
-
-        const newComplaint = new ComplaintModel({
-            description,
-            patient: patientId
-        });
-
-        await newComplaint.save();
-        res.status(201).json({ message: "Complaint submitted successfully", complaint: newComplaint });
-    } catch (error) {
-        console.error("Error submitting complaint:", error);
-        res.status(500).json({ message: "Server error" });
+    const { description, patientId, date } = req.body;
+  
+    if (!description || !patientId || !date) {
+      return res.status(400).json({ error: "Champs requis manquants." });
     }
-});
-
-app.get("/api/complaints/:patientId", async (req, res) => {
+  
+    try {
+      const newComplaint = new ComplaintModel({
+        description,
+        patientId,
+        date,
+        status: "Pending",
+      });
+      await newComplaint.save();
+      res.status(201).json(newComplaint);
+    } catch (error) {
+      console.error("Erreur lors de l’enregistrement :", error);
+      res.status(500).json({ error: "Erreur serveur." });
+    }
+  });
+  
+  
+  
+// Route pour ajouter un rendez-vous
+app.post("/appointments", async (req, res) => {
+    try {
+      const { startTime, endTime, status, patient, doctor } = req.body;
+  
+      if (!startTime || !endTime || !status || !patient || !doctor) {
+        return res.status(400).json({ message: "Tous les champs requis ne sont pas fournis" });
+      }
+  
+      const newAppointment = new AppointmentModel({
+        startTime,
+        endTime,
+        status,
+        patient,
+        doctor
+      });
+  
+      await newAppointment.save();
+      res.status(201).json({ message: "Rendez-vous ajouté avec succès", appointment: newAppointment });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+  });
+  app.get("/api/complaints/:patientId", async (req, res) => {
     try {
         const { patientId } = req.params;
         const complaints = await ComplaintModel.find({ patient: patientId });
@@ -973,7 +1226,6 @@ app.get("/api/complaints/:patientId", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
-
 app.put("/api/complaints/:id/status", async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -986,7 +1238,7 @@ app.put("/api/complaints/:id/status", async (req, res) => {
         const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
             id,
             { status },
-            { new: true }
+            { new: true } // Return the updated document
         );
 
         if (!updatedComplaint) {
@@ -1004,14 +1256,17 @@ app.get('/appointments/medecin/:idMedecin', async (req, res) => {
     const { idMedecin } = req.params;
 
     try {
+        // Chercher uniquement les startTime des rendez-vous du médecin
         const appointments = await AppointmentModel.find({ doctor: idMedecin }).select('startTime -_id');
 
         if (!appointments.length) {
             return res.status(404).json({ message: 'Aucun rendez-vous trouvé pour ce médecin' });
         }
 
+        // Extraire uniquement les startTimea
         const startTimes = appointments.map(appointment => appointment.startTime);
 
+        // Envoyer le résultat
         res.status(200).json({ startTimes });
     } catch (error) {
         console.error('Erreur lors de la récupération des rendez-vous:', error);
@@ -1023,12 +1278,14 @@ app.get('/appointments/patient/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
+        // Chercher tous les rendez-vous pour le patient (par userId)
         const appointments = await AppointmentModel.find({ patient: userId });
 
         if (!appointments.length) {
             return res.status(404).json({ message: 'Aucun rendez-vous trouvé pour ce patient' });
         }
 
+        // Envoyer les données complètes des rendez-vous
         res.status(200).json({ appointments });
     } catch (error) {
         console.error('Erreur lors de la récupération des rendez-vous:', error);

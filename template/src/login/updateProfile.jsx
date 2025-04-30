@@ -96,7 +96,7 @@ const UpdateProfile = () => {
   };
 
   return (
-    <div className="login-page">
+    <div className="update-profile-page">
       <div className="wrapper">
         <form onSubmit={handleSubmit}>
           <h1>Modifier le Profil</h1>
@@ -178,8 +178,8 @@ const UpdateProfile = () => {
                 {errors.gender && <p className="error-message">{errors.gender}</p>}
               </div>
 
-              <button type="submit">Mettre à Jour</button>
-            </>
+              <button type="submit" className="update-button">Mettre à Jour</button>
+              </>
           )}
         </form>
       </div>

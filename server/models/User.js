@@ -30,11 +30,9 @@ const UserSchema = new mongoose.Schema({
         enum: ["ADMIN", "PATIENT", "NURSE", "DOCTOR"],
         default: "PATIENT"
     },
-    status: {
-        type: String,
-        enum: ["URGENT", "APPOINTMENT"],
-        default: "APPOINTMENT"
-    },
+    status: String,
+    images: [String],
+    files: [String],  // Champ pour stocker plusieurs images (tableau d'URLs)
     verificationCode: String,
     verificationCodeExpires: Date 
 })

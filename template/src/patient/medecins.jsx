@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Importez useNavigate
 import "./../admin/user.css";
 
 export const Medecins = () => {
-  const idPatient = localStorage.getItem("userId");
   const { specialite } = useParams();
   const [medecins, setMedecins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Créez une instance de navigate
 
   useEffect(() => {
     const fetchMedecins = async () => {
@@ -32,7 +31,8 @@ export const Medecins = () => {
   }, [specialite]);
 
   const handleReserve = (idMedecin) => {
-    navigate(`/rdv/${idMedecin}/${idPatient}`);
+    // Redirige vers la page Rdv avec l'ID du médecin dans l'URL
+    navigate(`/rdv/${idMedecin}`);
   };
 
   return (

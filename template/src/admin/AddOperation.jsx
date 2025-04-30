@@ -12,6 +12,7 @@ function AddOperation() {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     axios.get('http://localhost:3001/api/patients')
@@ -27,9 +28,35 @@ function AddOperation() {
       .catch(error => console.error(error));
   }, []);
 
-  const handleSubmit = (e) => {
+  const checkTimeConflict = async (start, end, doctorId, patientId) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/check-conflict`, {
+        params: { start, end, doctorId, patientId }
+      });
+      return response.data.conflict;
+    } catch (error) {
+      console.error("Error checking time conflict:", error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+
     const newOperation = { startTime, endTime, description, patient, doctor, room };
+    const currentTime = new Date();
+
+    if (new Date(startTime) < currentTime) {
+      setErrorMessage("Vous ne pouvez pas ajouter une opération dans le passé.");
+      return;
+    }
+
+    const conflict = await checkTimeConflict(startTime, endTime, doctor, patient);
+    if (conflict) {
+      setErrorMessage("L'horaire choisi est déjà pris par un rendez-vous ou une autre opération.");
+      return;
+    }
 
     axios.post('http://localhost:3001/api/operations', newOperation)
       .then(() => alert("Opération ajoutée avec succès !"))
@@ -39,6 +66,7 @@ function AddOperation() {
   return (
     <div className="add-operation-container">
       <h2 className="add-operation-title">Ajouter une opération</h2>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
       <form className="add-operation-form" onSubmit={handleSubmit}>
         <div className="add-operation-form-group">
           <label className="add-operation-label">Heure de début</label>

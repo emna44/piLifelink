@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./login.css"; // Assurez-vous que ce fichier est bien importé
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Forgetpass() {
   const [email, setEmail] = useState("");

@@ -3,19 +3,12 @@ import axios from "axios";
 import RoomUpdate from "./roomUpdate";
 import "./roomList.css";
 
-const AddRoom = () => {
-  // States for both room management and room creation
+const Room = () => {
   const [rooms, setRooms] = useState([]);
   const [error, setError] = useState("");
   const [editingRoom, setEditingRoom] = useState(null);
   const [searchNumber, setSearchNumber] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState("");
-  
-  // State for simple room addition form
-  const [roomNumber, setRoomNumber] = useState("");
-  const [description, setDescription] = useState("");
-  const [message, setMessage] = useState("");
-  const [showAdvancedForm, setShowAdvancedForm] = useState(false);
 
   useEffect(() => {
     fetchRooms();
@@ -28,23 +21,6 @@ const AddRoom = () => {
     } catch (err) {
       console.error("Erreur :", err);
       setError("Erreur lors du chargement des salles");
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const newRoom = { roomNumber, description };
-
-    try {
-      const response = await axios.post("http://localhost:3001/addroom", newRoom);
-      setMessage(response.data.message);
-      setRoomNumber("");
-      setDescription("");
-      fetchRooms(); // Refresh room list after adding
-    } catch (error) {
-      console.error(error);
-      setMessage("Erreur lors de l'ajout de la salle");
     }
   };
 
@@ -65,40 +41,21 @@ const AddRoom = () => {
   };
 
   const RoomForm = ({ onRoomAdded }) => {
-    const [advRoomNumber, setAdvRoomNumber] = useState("");
+    const [roomNumber, setRoomNumber] = useState("");
     const [availability, setAvailability] = useState(true);
-    const [patient, setPatient] = useState("");
-    const [patients, setPatients] = useState([]);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    useEffect(() => {
-      const fetchPatients = async () => {
-        try {
-          const response = await axios.get("http://localhost:3001/users");
-          const filtered = response.data.filter((u) => u.role === "PATIENT");
-          setPatients(filtered);
-        } catch (error) {
-          console.error("Erreur chargement patients :", error);
-          setErrorMessage("Erreur lors du chargement des patients.");
-        }
-      };
-
-      fetchPatients();
-    }, []);
-
-    const handleAdvSubmit = async (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
         await axios.post("http://localhost:3001/room", {
-          roomNumber: advRoomNumber,
+          roomNumber,
           availability,
-          patient,
         });
         setSuccessMessage("Salle ajoutée avec succès !");
-        setAdvRoomNumber("");
+        setRoomNumber("");
         setAvailability(true);
-        setPatient("");
         onRoomAdded();
       } catch (error) {
         console.error("Erreur lors de l'ajout :", error);
@@ -107,53 +64,30 @@ const AddRoom = () => {
     };
 
     return (
-      <div className="max-w-md mx-auto mb-10 p-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Room (Advanced)</h2>
-        {successMessage && <p className="text-green-600 text-center mb-2">{successMessage}</p>}
-        {errorMessage && <p className="text-red-600 text-center mb-2">{errorMessage}</p>}
-        <form onSubmit={handleAdvSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-semibold">Room Number</label>
-            <input
-              type="text"
-              value={advRoomNumber}
-              onChange={(e) => setAdvRoomNumber(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
+      <div className="form-container">
+        <h2 className="title-section">Add Room</h2>
+        {successMessage && <p className="success-message">{successMessage}</p>}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
+        <form onSubmit={handleSubmit}>
+          <label>Room Number</label>
+          <input
+            type="text"
+            value={roomNumber}
+            onChange={(e) => setRoomNumber(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="block text-gray-700 font-semibold">Disponibilité:</label>
-            <select
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value === "true")}
-              className="w-full p-2 border border-gray-300 rounded"
-            >
-              <option value="true">Disponible</option>
-              <option value="false">Occupée</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold">Patient associé (optionnel):</label>
-            <select
-              value={patient}
-              onChange={(e) => setPatient(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-            >
-              <option value="">Aucun</option>
-              {patients.map((p) => (
-                <option key={p._id} value={p._id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          <label>Disponibilité:</label>
+          <select
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value === "true")}
           >
-            Ajouter la salle
+            <option value="true">Disponible</option>
+            <option value="false">Occupée</option>
+          </select>
+
+          <button type="submit" className="btn-primary">
+            + Add room
           </button>
         </form>
       </div>
@@ -161,124 +95,106 @@ const AddRoom = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto mt-10 p-6 bg-white rounded-lg">
-      <div className="mb-8 text-center">
-        <button 
-          onClick={() => setShowAdvancedForm(!showAdvancedForm)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          {showAdvancedForm ? "Afficher formulaire simple" : "Afficher formulaire avancé"}
-        </button>
-      </div>
-      
-      {showAdvancedForm ? (
-        <RoomForm onRoomAdded={fetchRooms} />
-      ) : (
-        <div>
-          <h2 className="text-2xl font-bold mb-4 text-center">Ajouter une salle</h2>
-          {message && <p className="text-center text-green-600 mb-2">{message}</p>}
-          <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-10 space-y-4">
-            <div>
-              <label className="block text-gray-700 font-semibold">Numéro de la salle</label>
-              <input
-                type="text"
-                value={roomNumber}
-                onChange={(e) => setRoomNumber(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 font-semibold">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
-            </div>
-            <button 
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-            >
-              Ajouter la salle
-            </button>
-          </form>
-        </div>
-      )}
+    <div className="page-container">
+      {/* Formulaire d'ajout */}
+      <RoomForm onRoomAdded={fetchRooms} />
 
-      <h2 className="text-3xl font-bold mb-8 text-center">Room List</h2>
+      {/* Titre */}
+      <h2 className="title-main">Room List</h2>
 
-      {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+      {/* Message d'erreur */}
+      {error && <p className="error-message">{error}</p>}
 
-      {/* --- Barre de recherche --- */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6 items-center justify-center">
+      {/* --- Barre de recherche et filtre --- */}
+      <div className="search-filter-container">
         <input
           type="text"
           placeholder="Rechercher par numéro..."
           value={searchNumber}
           onChange={(e) => setSearchNumber(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-full sm:w-1/3"
+          className="search-input"
         />
         <select
           value={availabilityFilter}
           onChange={(e) => setAvailabilityFilter(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-full sm:w-1/3"
+          className="search-select"
         >
           <option value="">Toutes les disponibilités</option>
           <option value="true">Disponible</option>
-          <option value="false">Occupée</option>
         </select>
       </div>
 
+      {/* Liste des salles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {rooms
           .filter((room) => {
-            const matchesNumber = room.roomNumber
+            const matchesNumber = String(room.roomNumber)
               .toLowerCase()
               .includes(searchNumber.toLowerCase());
-              const matchesAvailability =
-              availabilityFilter === ""
-                ? true
-                : String(room.availability) === availabilityFilter;
-            
+
+            let matchesAvailability = true;
+            if (availabilityFilter === "true") {
+              matchesAvailability = room.availability === true;
+            } else if (availabilityFilter === "false") {
+              matchesAvailability = room.availability === false;
+            }
+
             return matchesNumber && matchesAvailability;
           })
           .map((room) => (
-            <div
-              key={room._id}
-              className="bg-white border shadow rounded-xl p-5 text-center"
-            >
-              <p className="text-lg font-semibold mb-2">Room number {room.roomNumber}</p>
-              <p className="mb-1">
-                <strong>Disponibilité:</strong>{" "}
-                {room.availability ? (
-                  <span className="text-green-600 font-bold">Disponible</span>
-                ) : (
-                  <span className="text-red-600 font-bold">Occupée</span>
-                )}
+            <div key={room._id} className="room-card">
+              <p className="text-lg font-semibold mb-2">
+                Room number {room.roomNumber}
               </p>
-              <p className="mb-3">
-                <strong>Patient:</strong> {room.patient?.name || room.patient || "Aucun"}
+              <p>
+                <strong>Disponibilité:</strong>{" "}
+                <span
+                  className={
+                    room.availability
+                      ? "status-available"
+                      : "status-occupied"
+                  }
+                >
+                  {room.availability ? "Disponible" : "Occupée"}
+                </span>
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-2 mt-3">
                 <button
-                  className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded"
+                  className="btn-secondary"
                   onClick={() => setEditingRoom(room)}
                 >
-                  Modifier
+                  {/* Icon Edit */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24px"
+                    viewBox="0 -960 960 960"
+                    width="24px"
+                    fill="#FFFFFF"
+                  >
+                    <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+                  </svg>
                 </button>
                 <button
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded"
+                  className="btn-danger"
                   onClick={() => handleDelete(room._id)}
                 >
-                  Supprimer
+                  {/* Icon Delete */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24px"
+                    viewBox="0 -960 960 960"
+                    width="24px"
+                    fill="#FFFFFF"
+                  >
+                    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                  </svg>
                 </button>
               </div>
             </div>
           ))}
       </div>
 
+      {/* Formulaire de mise à jour */}
       {editingRoom && (
         <RoomUpdate
           room={editingRoom}
@@ -290,4 +206,4 @@ const AddRoom = () => {
   );
 };
 
-export default AddRoom;
+export default Room;
