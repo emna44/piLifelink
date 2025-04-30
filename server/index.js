@@ -10,6 +10,7 @@ const multer=require ('multer');
 
 const { OAuth2Client } = require("google-auth-library");
 
+const locationModel = require("./models/locationEmergency")
 
 // Importation des modèles (ajuste les chemins en fonction de ton projet)
 const UserModel = require("./models/User");
@@ -101,6 +102,45 @@ app.get("/appointments", async (req, res) => {
         res.status(500).json({ message: "Erreur serveur" });
     }
 });
+
+
+app.get("/locations", async (req, res) => { 
+    try {
+        // Récupérer uniquement lat et lng des localisations
+        const locations = await locationModel.find({}, "lat lng");
+
+        if (locations.length === 0) {
+            // Si aucune localisation n'est trouvée
+            return res.status(404).json({ message: "Aucune localisation trouvée" });
+        }
+
+        // Envoi des données au client
+        res.status(200).json(locations);
+    } catch (error) {
+        // Retourner un message d'erreur spécifique
+        console.error("Erreur lors de la récupération des localisations:", error.message);
+        res.status(500).json({ error: "Erreur interne du serveur. Veuillez réessayer plus tard." });
+    }
+});
+
+app.post("/api/location", async (req, res) => {
+    try {
+      const { lat, lng } = req.body;
+  
+      if (lat === undefined || lng === undefined) {
+        return res.status(400).json({ message: "Latitude et longitude sont requises" });
+      }
+  
+      const newLocation = new locationModel({ lat, lng });
+      await newLocation.save();
+  
+      res.status(201).json({ message: "Localisation enregistrée avec succès", location: newLocation });
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement de la localisation:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+  
 
 // Route pour ajouter un rendez-vous
 app.post("/appointments", async (req, res) => {

@@ -4,6 +4,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import Popping from './popping';
+import './popping.css';
 
 const localizer = momentLocalizer(moment);
 

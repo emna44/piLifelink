@@ -1,4 +1,5 @@
 import React from 'react';
+import './popping.css';
 
 const Popping = ({ open, handleClose, event }) => {
   if (!event) return null; 

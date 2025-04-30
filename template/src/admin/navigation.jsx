@@ -11,6 +11,8 @@ import Materiel from "./Materiel";
 import Operation from "../medecin/Operation";
 import Room from "./room";
 import AddOperation from "./AddOperation";
+import Map from "./map";
+
 export const Navigation = () => {
   const [selectedMenu, setSelectedMenu] = useState("dashboard");
   const [ambulanceView, setAmbulanceView] = useState("list");
@@ -68,6 +70,12 @@ export const Navigation = () => {
           return <AddOperation></AddOperation>
       case "room":
         return <Room></Room>;
+        case "Map":
+          return (
+            <div style={{ height: "calc(100vh - 40px)", width: "100%" }}>
+              <Map />
+            </div>
+          );
       case "ambulance":
         return (
           <div>
@@ -124,6 +132,7 @@ export const Navigation = () => {
           <li><button onClick={() => setSelectedMenu("nurse")} style={linkStyle}>Nurse</button></li>
           <li><button onClick={() => setSelectedMenu("material")} style={linkStyle}>Material</button></li>
           <li><button onClick={() => setSelectedMenu("operation")} style={linkStyle}>Operation</button></li>
+          <li><button onClick={() => setSelectedMenu("Map")} style={linkStyle}>Emergency Map</button></li>
 
           <li><button onClick={() => setSelectedMenu("room")} style={linkStyle}>Room</button></li>
           <li><button onClick={() => setSelectedMenu("ambulance")} style={linkStyle}>Ambulance Staff</button></li>
