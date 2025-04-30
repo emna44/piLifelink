@@ -43,7 +43,7 @@ pipeline {
                     sonar-scanner \
                       -Dsonar.projectKey=nodeapp \
                       -Dsonar.sources=server \
-                      -Dsonar.host.url=http://192.167.33.10:9000 \
+                      -Dsonar.host.url=http://192.167.33.10:9001 \
                       -Dsonar.login="$SONAR_TOKEN" \
                       -X
                     '''
