@@ -18,7 +18,7 @@ const otherIcon = new L.Icon({
   popupAnchor: [0, -30]
 });
 
-const hospitalPosition = [36.89860883445896, 10.188693963915098];
+const hospitalPosition = [36.8020620949773, 10.105520217886193];
 
 const API_KEY = '5b3ce3597851110001cf6248bc923b0333dd4573b90d846c4a819a03';
 

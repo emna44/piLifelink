@@ -1,93 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Ajoutez useNavigate
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './mesrdv.css';  // Import the CSS file
 
 const MesRdv = () => {
-  const { userId } = useParams(); 
-  const [appointments, setAppointments] = useState([]); 
+  const { userId } = useParams();
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/appointments/patient/${userId}`);
-        
-        // Vérification que la réponse est un tableau et non un objet avec une clé 'appointments'
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          setAppointments(response.data); // Stocker les rendez-vous si la réponse est valide
+        if (Array.isArray(response.data)) {
+          setAppointments(response.data);
         } else {
-          console.warn("Aucun rendez-vous trouvé pour cet utilisateur");
-          setAppointments([]); // Si aucune donnée n'est trouvée, on met un tableau vide
+          setAppointments([]);
         }
-        setLoading(false); // Fin du chargement
       } catch (error) {
         console.error("Erreur lors de la récupération des rendez-vous:", error);
-        setLoading(false); // Fin du chargement en cas d'erreur
+      } finally {
+        setLoading(false);
       }
     };
-  
+
     fetchAppointments();
   }, [userId]);
 
   const handleNavigate = () => {
-    // Redirige vers la page historique du patient
     navigate(`/${userId}/historique`);
   };
 
   if (loading) {
-    return <div>Chargement des rendez-vous...</div>;
+    return <div className="loading">Chargement des rendez-vous...</div>;
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2 style={{ textAlign: 'center' }}>Mes Rendez-vous</h2>
+    <div className="mesrdv-container">
+      <h2 className="title">Mes Rendez-vous</h2>
 
-      {/* Afficher un message si aucun rendez-vous n'est trouvé */}
       {appointments.length === 0 ? (
-        <p>Aucun rendez-vous trouvé pour cet utilisateur.</p>
+        <p className="no-appointments">Aucun rendez-vous trouvé pour cet utilisateur.</p>
       ) : (
-        <div>
-          {/* Affichage des rendez-vous */}
+        <div className="appointments-list">
           {appointments.map((rdv, index) => (
-            <div
-              key={index}
-              style={{
-                border: '1px solid #ccc',
-                padding: '10px',
-                margin: '10px 0',
-                borderRadius: '5px',
-              }}
-            >
-              <h3>Rendez-vous {index + 1}</h3>
-              <p><strong>Start Time:</strong> {new Date(rdv.startTime).toLocaleString()}</p>
-              <p><strong>End Time:</strong> {new Date(rdv.endTime).toLocaleString()}</p>
-              <p><strong>Status:</strong> {rdv.status}</p>
-              <p><strong>Doctor:</strong> {rdv.doctor.name} {rdv.doctor.lastName}</p> {/* Affichage des informations du médecin */}
+            <div key={index} className="appointment-card">
+              <h3>Appointment</h3>
+              <p>
+                <span className="icon">
+                  📅
+                </span>
+                <strong> Start:</strong> {new Date(rdv.startTime).toLocaleString()}
+              </p>
+              <p>
+                <span className="icon">
+                  🕒
+                </span>
+                <strong> End:</strong> {new Date(rdv.endTime).toLocaleString()}
+              </p>
+              <p>
+                <span className="icon">✅</span>
+                <strong> {rdv.status.charAt(0).toUpperCase() + rdv.status.slice(1)}</strong>
+              </p>
+              <p>
+                <span className="icon">👨‍⚕️</span>
+                <strong> Doctor:</strong> {rdv.doctor.name} {rdv.doctor.lastName}
+              </p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Boutons pour naviguer */}
-      <div style={{ marginTop: '20px' }}>
-        <button
-          onClick={handleNavigate}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginRight: '10px',
-          }}
-        >
+      <div className="buttons-container">
+        <button onClick={handleNavigate} className="btn-view-history">
           Voir l'historique
         </button>
-
-        {/* Ajouter un autre bouton avec une fonctionnalité différente */}
-        
       </div>
     </div>
   );
