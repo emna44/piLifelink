@@ -18,28 +18,24 @@ const specialites = [
   { nom: "Dermatologie", image: "/images/dermato.jpg" }
 ];
 
-// Fonction pour "slugifier" le nom (URL friendly)
-const slugify = (str) =>
-  str.toLowerCase()
-     .normalize('NFD')
-     .replace(/[\u0300-\u036f]/g, '') // Enlève accents
-     .replace(/\s+/g, '-') // Remplace espaces par tirets
-     .replace(/[^\w-]+/g, ''); // Supprime les caractères spéciaux
-
 const SpecialiteCard = ({ nom, image }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/medecins/${slugify(nom)}`);
+    navigate(`/medecins/${nom}`); // Passer le nom en paramètre dans l'URL
   };
 
   return (
-    <div className="card" onClick={handleClick}>
-      <img src={image} alt={nom} className="card-img" />
+    <div className="card">
+      <img
+        src={image}
+        alt={nom}
+        className="card-img"
+      />
       <div className="card-content">
         <div className="specialite">{nom}</div>
         <div className="card-footer">
-          <button className="btn">Voir la spécialité</button>
+          <button className="btn" onClick={handleClick}>Voir la spécialité</button>
         </div>
       </div>
     </div>
@@ -49,8 +45,10 @@ const SpecialiteCard = ({ nom, image }) => {
 export const ListeSpecialites = () => {
   return (
     <div className="liste-container">
-      <h1>Nos Spécialités Médicales</h1>
-      <div className="cards-grid">
+      <h1 style={{ textAlign: "center", fontSize: "2rem", margin: "30px 0" }}>
+        Nos Spécialités Médicales
+      </h1>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "20px" }}>
         {specialites.map((spec, index) => (
           <SpecialiteCard key={index} nom={spec.nom} image={spec.image} />
         ))}

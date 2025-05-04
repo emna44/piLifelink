@@ -37,7 +37,13 @@ const MesRdv = () => {
   }
 
   return (
-    <div className="mesrdv-container">
+      <div className="mesrdv-container">
+  {/* Back button at the top-right */}
+  <div className="top-bar">
+    <button className="back-button" onClick={() => navigate(-1)}>← Retour</button>
+  </div>
+
+
       <h2 className="title">Mes Rendez-vous</h2>
 
       {appointments.length === 0 ? (

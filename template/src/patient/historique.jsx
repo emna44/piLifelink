@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
+import './historique.css'; 
 
 const UserFiles = () => {
   const { userId } = useParams();
   const [userFiles, setUserFiles] = useState({ files: [], images: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserFiles = async () => {
       try {
         const response = await fetch(`http://localhost:3001/api/users/${userId}/fichiers`);
-        if (!response.ok) {
-          throw new Error('Impossible de récupérer les fichiers');
-        }
+        if (!response.ok) throw new Error('Impossible de récupérer les fichiers');
         const data = await response.json();
         setUserFiles(data);
       } catch (err) {
@@ -26,46 +26,51 @@ const UserFiles = () => {
     fetchUserFiles();
   }, [userId]);
 
-  if (loading) return <div>Chargement des fichiers...</div>;
-  if (error) return <div>Erreur : {error}</div>;
+  if (loading) return <div className="user-files-container">Chargement des fichiers...</div>;
+  if (error) return <div className="user-files-container">Erreur : {error}</div>;
 
   return (
-    <div>
-      <h2>Fichiers de l'utilisateur {userId}</h2>
+    <div className="user-files-container">
+       {/* Back button at the top-right */}
+  <div className="top-bar">
+    <button className="back-button" onClick={() => navigate(-1)}>← Retour</button>
+  </div>
+      <h2 className="user-files-title">Fichiers de l'utilisateur {userId}</h2>
 
-      {/* Affichage des fichiers PDF */}
-      <div>
-        <h3>Fichiers PDF :</h3>
-        <ul>
-          {userFiles.files.length === 0 ? (
-            <p>Aucun fichier PDF disponible.</p>
-          ) : (
-            userFiles.files.map((file, index) => (
-              <li key={index}>
-                <a href={`http://localhost:3001/files/${file}`} target="_blank" rel="noopener noreferrer">
-                  {file}
-                </a>
-              </li>
-            ))
-          )}
-        </ul>
+      <div className="files-section">
+        <h3 className="section-title">Fichiers PDF :</h3>
+        {userFiles.files.length === 0 ? (
+          <p className="no-data">Aucun fichier PDF disponible.</p>
+        ) : (
+          userFiles.files.map((file, index) => (
+            <a
+              key={index}
+              className="file-link"
+              href={`http://localhost:3001/files/${file}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {file}
+            </a>
+          ))
+        )}
       </div>
 
-      {/* Affichage des images */}
-      <div>
-        <h3>Images :</h3>
+      <div className="images-section">
+        <h3 className="section-title">Images :</h3>
         {userFiles.images.length === 0 ? (
-          <p>Aucune image disponible.</p>
+          <p className="no-data">Aucune image disponible.</p>
         ) : (
-          userFiles.images.map((image, index) => (
-            <div key={index}>
+          <div className="image-grid">
+            {userFiles.images.map((image, index) => (
               <img
+                key={index}
                 src={`http://localhost:3001/images/${image}`}
                 alt={`Image ${index}`}
-                style={{ width: "200px", height: "auto", marginBottom: "10px" }}
+                className="image-preview"
               />
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>
