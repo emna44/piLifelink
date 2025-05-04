@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import './specialite.css'; // Ton fichier de style
+import './specialite.css'; // Ton fichier de style CSS
 
 const specialites = [
   { nom: "Cardiologie", image: "/images/cardiologie.jpg" },
@@ -22,16 +22,12 @@ const SpecialiteCard = ({ nom, image }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/medecins/${nom}`); // Passer le nom en paramètre dans l'URL
+    navigate(`/medecins/${nom}`); // Redirection avec le nom de la spécialité
   };
 
   return (
     <div className="card">
-      <img
-        src={image}
-        alt={nom}
-        className="card-img"
-      />
+      <img src={image} alt={nom} className="card-img" />
       <div className="card-content">
         <div className="specialite">{nom}</div>
         <div className="card-footer">
@@ -45,10 +41,8 @@ const SpecialiteCard = ({ nom, image }) => {
 export const ListeSpecialites = () => {
   return (
     <div className="liste-container">
-      <h1 style={{ textAlign: "center", fontSize: "2rem", margin: "30px 0" }}>
-        Nos Spécialités Médicales
-      </h1>
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "20px" }}>
+      <h1>Nos Spécialités Médicales</h1>
+      <div className="cards-grid">
         {specialites.map((spec, index) => (
           <SpecialiteCard key={index} nom={spec.nom} image={spec.image} />
         ))}
