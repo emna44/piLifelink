@@ -13,7 +13,6 @@ const CreateAmbulance = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation des champs
     if (!model || !serie || !contact || !location) {
       setMessage("❌ Tous les champs sont requis.");
       return;
@@ -48,72 +47,69 @@ const CreateAmbulance = () => {
   };
 
   return (
-    <div className="login-page">
-      <div className="wrapper">
-        <h1>Create Ambulance</h1>
-        {message && <p className="message">{message}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="input-box">
-            <input
-              type="text"
-              placeholder="Model"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              required
-            />
-            <FaCar className="icon" />
-          </div>
+    <div className="create-ambulance-container">
+      <h1 className="create-ambulance-title">Créer Ambulance</h1>
+      {message && <p className="create-ambulance-message">{message}</p>}
+      <form onSubmit={handleSubmit} className="create-ambulance-form">
+        <div className="create-ambulance-input-box">
+          <input
+            type="text"
+            placeholder="Model"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            required
+          />
+          <FaCar className="create-ambulance-icon" />
+        </div>
 
-          <div className="input-box">
-            <input
-              type="text"
-              placeholder="Serie"
-              value={serie}
-              onChange={(e) => setSerie(e.target.value)}
-              required
-            />
-          </div>
+        <div className="create-ambulance-input-box">
+          <input
+            type="text"
+            placeholder="Serie"
+            value={serie}
+            onChange={(e) => setSerie(e.target.value)}
+            required
+          />
+        </div>
 
-          <div className="input-box">
-            <input
-              type="text"
-              placeholder="Contact"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              required
-            />
-            <FaPhoneAlt className="icon" />
-          </div>
+        <div className="create-ambulance-input-box">
+          <input
+            type="text"
+            placeholder="Contact"
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
+            required
+          />
+          <FaPhoneAlt className="create-ambulance-icon" />
+        </div>
 
-          <div className="input-box">
-            <input
-              type="text"
-              placeholder="Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-            />
-            <FaMapMarkerAlt className="icon" />
-          </div>
+        <div className="create-ambulance-input-box">
+          <input
+            type="text"
+            placeholder="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+          <FaMapMarkerAlt className="create-ambulance-icon" />
+        </div>
 
-          <div className="input-box">
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              required
-              className="role-select"
-            >
-              <option value="AVAILABLE">Available</option>
-              <option value="BUSY">Busy</option>
-            </select>
-            <FaRegFlag className="icon" />
-          </div>
+        <div className="create-ambulance-input-box">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            required
+          >
+            <option value="AVAILABLE">Available</option>
+            <option value="BUSY">Busy</option>
+          </select>
+          <FaRegFlag className="create-ambulance-icon" />
+        </div>
 
-          <button type="submit" className="btn-primary">
-            Create Ambulance
-          </button>
-        </form>
-      </div>
+        <button type="submit" className="create-ambulance-button">
+          Créer Ambulance
+        </button>
+      </form>
     </div>
   );
 };

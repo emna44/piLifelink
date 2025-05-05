@@ -10,7 +10,7 @@ const multer=require ('multer');
 
 const { OAuth2Client } = require("google-auth-library");
 
-const locationModel = require("./models/locationEmergency")
+const Location = require('./models/locationEmergency'); // Assurez-vous que ce chemin est correct
 
 // Importation des modèles (ajuste les chemins en fonction de ton projet)
 const UserModel = require("./models/User");
@@ -103,35 +103,50 @@ app.get("/appointments", async (req, res) => {
     }
 });
 
-
-app.get("/locations", async (req, res) => { 
+app.get("/locations", async (req, res) => {
     try {
-        // Récupérer uniquement lat et lng des localisations
-        const locations = await locationModel.find({}, "lat lng");
-
-        if (locations.length === 0) {
-            // Si aucune localisation n'est trouvée
-            return res.status(404).json({ message: "Aucune localisation trouvée" });
-        }
-
-        // Envoi des données au client
-        res.status(200).json(locations);
+      const locations = await Location.find({ confirmed: true }, "lat lng");
+      if (locations.length === 0) {
+        return res.status(404).json({ message: "Aucune localisation trouvée" });
+      }
+      res.status(200).json(locations);
     } catch (error) {
-        // Retourner un message d'erreur spécifique
-        console.error("Erreur lors de la récupération des localisations:", error.message);
-        res.status(500).json({ error: "Erreur interne du serveur. Veuillez réessayer plus tard." });
+      console.error("Erreur lors de la récupération des localisations:", error.message);
+      res.status(500).json({ error: "Erreur interne du serveur. Veuillez réessayer plus tard." });
     }
-});
-
-app.post("/api/location", async (req, res) => {
+  });
+  
+  app.get("/locations/pending", async (req, res) => {
+    try {
+      const pendingLocations = await Location.find({ confirmed: false });
+      res.json(pendingLocations);
+    } catch (error) {
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+  
+  app.put("/locations/:id/confirm", async (req, res) => {
+    try {
+      const updated = await Location.findByIdAndUpdate(
+        req.params.id,
+        { confirmed: true },
+        { new: true }
+      );
+      if (!updated) return res.status(404).json({ message: "Localisation introuvable" });
+      res.json({ message: "Localisation confirmée", location: updated });
+    } catch (error) {
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+  
+  app.post("/api/location", async (req, res) => {
     try {
       const { lat, lng } = req.body;
-  
       if (lat === undefined || lng === undefined) {
         return res.status(400).json({ message: "Latitude et longitude sont requises" });
       }
   
-      const newLocation = new locationModel({ lat, lng });
+      const newLocation = new Location({ lat, lng });
       await newLocation.save();
   
       res.status(201).json({ message: "Localisation enregistrée avec succès", location: newLocation });
@@ -140,8 +155,42 @@ app.post("/api/location", async (req, res) => {
       res.status(500).json({ message: "Erreur serveur" });
     }
   });
-  
 
+  app.post('/api/affecterambulace', async (req, res) => { 
+    const { locationId, ambulanceId } = req.body;
+  
+    try {
+      const location = await Location.findById(locationId);
+      const ambulance = await AmbulanceModel.findById(ambulanceId);
+  
+      if (!location || !ambulance) {
+        return res.status(404).json({ message: 'Location or Ambulance not found' });
+      }
+  
+      // Affecter l'ambulance à la localisation
+      location.ambulanceId = ambulance._id;
+      await location.save();
+  
+      res.status(200).json({
+        message: 'Ambulance successfully assigned to location',
+        location: location,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error assigning ambulance to location' });
+    }
+  });
+
+  app.delete('/locations/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      await Location.findByIdAndDelete(id);
+      res.status(200).json({ message: 'Location supprimée avec succès.' });
+    } catch (err) {
+      res.status(500).json({ message: 'Erreur lors de la suppression.', error: err.message });
+    }
+  });
+  
 // Route pour ajouter un rendez-vous
 app.post("/appointments", async (req, res) => {
     try {
