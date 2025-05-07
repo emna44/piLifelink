@@ -79,7 +79,7 @@ const App = () => {
           <Route path="/specialite" element={<ListeSpecialites />} />
           <Route path="/complaints/:userId" element={<Complaint />} />
           <Route path="/:userId/historique" element={<Historique />} />
-
+          <Route path="/complaints/:userId" element={<Complaint />} />
 
         </Route>
 
@@ -105,6 +105,7 @@ const App = () => {
       <Route path="/updateProfile/:id" element={<UpdateProfile />} />
       <Route path="/showProfile/:id" element={<ShowProfile />} />
       <Route path="/codeAuth" element={<FactoryAuth></FactoryAuth>}></Route>
+
       <Route 
               path="/operationDoctor/:doctorId" 
               element={<OperationCalendarMedecin />} 

@@ -23,6 +23,8 @@ export const Navigation = () => {
     if (storedUserId) setUserId(storedUserId);
   }, []);
 
+  const userID= localStorage.getItem("userId")
+
   const Logout = () => {
     localStorage.removeItem("isLogedIn");
     localStorage.removeItem("userName");
@@ -54,7 +56,7 @@ export const Navigation = () => {
       case "profile":
         return <div>Profil de l'utilisateur #{userId}</div>;
       case "operations":
-        return <Operation doctorId={userId} />;
+        return <Operation doctorId={userID} />;
       case "Rendez-vous":
         return <MesRdvMedecin doctorId={userId} />;
       case "schedule":

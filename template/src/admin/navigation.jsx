@@ -12,6 +12,7 @@ import Operation from "../medecin/Operation";
 import Room from "./room";
 import AddOperation from "./AddOperation";
 import Map from "./map";
+import Complaint from "./Complaint";
 
 export const Navigation = () => {
   const [selectedMenu, setSelectedMenu] = useState("dashboard");
@@ -57,23 +58,25 @@ export const Navigation = () => {
   const renderContent = () => {
     switch (selectedMenu) {
       case "user":
-        return <User />;
+        return <User className="page-scroll" />;
       case "doctor":
-        return <DoctorFilter />;
+        return <DoctorFilter className="page-scroll" />;
       case "patient":
         return <Patinetfilter />;
-      case "nurse":
-        return <FilterNurse />;
+    
         case "material":
-          return <Materiel/>;
+          return <Materiel className="page-scroll" />;
+          case "complaint":
+          return <Complaint className="page-scroll" />;
+          
          case "operation":
-          return <AddOperation></AddOperation>
+          return <AddOperation className="page-scroll" ></AddOperation>
       case "room":
-        return <Room></Room>;
+        return <Room className="page-scroll" ></Room>;
         case "Map":
           return (
             <div style={{ height: "calc(100vh - 40px)", width: "100%" }}>
-              <Map />
+              <Map className="page-scroll" />
             </div>
           );
       case "ambulance":
@@ -117,9 +120,8 @@ export const Navigation = () => {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <nav style={{ width: "250px", backgroundColor: "#2c3e50", color: "white", padding: "20px", position: "fixed", height: "100%", top: 0, left: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "white", fontSize: "18px" }}>
+    <div style={{ display: "flex", height: "100vh",overflowY: "auto" }}>
+<nav style={{ width: "250px", backgroundColor: "#2c3e50", color: "white", padding: "20px", position: "fixed", height: "100%", top: 0, left: 0, overflowY: "auto" }}>        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "white", fontSize: "18px" }}>
           <a href="#" onClick={handleUserClick}>
             <FaUserCircle size={20} style={{ marginRight: "5px" }} /> {userName}
           </a>
@@ -129,8 +131,9 @@ export const Navigation = () => {
           <li><button onClick={() => setSelectedMenu("user")} style={linkStyle}>User</button></li>
           <li><button onClick={() => setSelectedMenu("doctor")} style={linkStyle}>Doctors</button></li>
           <li><button onClick={() => setSelectedMenu("patient")} style={linkStyle}>Patient</button></li>
-          <li><button onClick={() => setSelectedMenu("nurse")} style={linkStyle}>Nurse</button></li>
           <li><button onClick={() => setSelectedMenu("material")} style={linkStyle}>Material</button></li>
+          <li><button onClick={() => setSelectedMenu("complaint")} style={linkStyle}>Complaints</button></li>
+
           <li><button onClick={() => setSelectedMenu("operation")} style={linkStyle}>Operation</button></li>
           <li><button onClick={() => setSelectedMenu("Map")} style={linkStyle}>Emergency Map</button></li>
 
@@ -140,7 +143,14 @@ export const Navigation = () => {
         </ul>
       </nav>
 
-      <div style={{ marginLeft: "250px", padding: "20px", flexGrow: 1 }}>
+
+      <div style={{ 
+        marginLeft: "250px", 
+        padding: "20px", 
+        flexGrow: 1,
+        height: "100vh",
+        overflowY: "auto" // Cette propriété est essentielle pour permettre le défilement
+      }}>
         {renderContent()}
       </div>
     </div>
@@ -159,10 +169,12 @@ const linkStyle = {
   textAlign: "left",
   width: "100%",
   cursor: "pointer",
+  overflowY: "auto"
 };
 
 const logoutStyle = {
   ...linkStyle,
   backgroundColor: "#e74c3c",
   textAlign: "center",
+  overflowY: "auto"
 };

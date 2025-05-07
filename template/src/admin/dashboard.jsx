@@ -7,7 +7,7 @@ export default function Dashboard(){
     return(
         
         <div>
-            <Navigation></Navigation>
+            <Navigation ></Navigation>
         </div>
        
     )

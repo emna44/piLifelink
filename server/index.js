@@ -7,10 +7,9 @@ const nodemailer = require("nodemailer"); // Pour envoyer des emails
 const bcrypt = require("bcrypt"); // Pour le hashing des mots de passe
 const path = require("path"); // Pour gérer les chemins de fichiers
 const multer=require ('multer');
-
 const { OAuth2Client } = require("google-auth-library");
 
-const locationModel = require("./models/locationEmergency")
+const Location = require('./models/locationEmergency'); // Assurez-vous que ce chemin est correct
 
 // Importation des modèles (ajuste les chemins en fonction de ton projet)
 const UserModel = require("./models/User");
@@ -103,41 +102,265 @@ app.get("/appointments", async (req, res) => {
     }
 });
 
+app.post("/api/complaints", async (req, res) => {
+    const { description, patientId, date } = req.body;
 
-app.get("/locations", async (req, res) => { 
+    if (!description || !patientId || !date) {
+        return res.status(400).json({ error: "Champs requis manquants." });
+    }
+
     try {
-        // Récupérer uniquement lat et lng des localisations
-        const locations = await locationModel.find({}, "lat lng");
-
-        if (locations.length === 0) {
-            // Si aucune localisation n'est trouvée
-            return res.status(404).json({ message: "Aucune localisation trouvée" });
-        }
-
-        // Envoi des données au client
-        res.status(200).json(locations);
+        const newComplaint = new ComplaintModel({
+            description,
+            patient: patientId, // Use the field name from your schema
+            date,
+            status: "Pending",
+        });
+        await newComplaint.save();
+        res.status(201).json(newComplaint);
     } catch (error) {
-        // Retourner un message d'erreur spécifique
-        console.error("Erreur lors de la récupération des localisations:", error.message);
-        res.status(500).json({ error: "Erreur interne du serveur. Veuillez réessayer plus tard." });
+        console.error("Erreur lors de l'enregistrement :", error);
+        res.status(500).json({ error: "Erreur serveur." });
     }
 });
 
-app.post("/api/location", async (req, res) => {
+app.get("/api/complaints/:patientId", async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        // Use $or to check both fields - for backward compatibility
+        const complaints = await ComplaintModel.find({
+            $or: [
+                { patient: patientId },
+                { patientId: patientId }
+            ]
+        });
+
+        res.json(complaints);
+    } catch (error) {
+        console.error("Error fetching complaints:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+app.put("/api/complaints/:id/status", async (req, res) => {
+    const { id } = req.params;
+    const { status, patientId } = req.body;
+
+    if (!["Pending", "In Treatment", "Resolved"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+    }
+
+    try {
+        // Update the complaint status
+        const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedComplaint) {
+            return res.status(404).json({ message: "Complaint not found" });
+        }
+
+        const notificationMessage = 
+            status === "Resolved" 
+                ? "Your complaint has been resolved." 
+                : status === "In Treatment" 
+                    ? "Your complaint is being processed." 
+                    : "Your complaint status has been updated.";
+
+     
+        
+        
+        res.json({
+            complaint: updatedComplaint,
+            notification: {
+                message: notificationMessage,
+                recipient: patientId
+            }
+        });
+    } catch (error) {
+        console.error("Error updating complaint status:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get("/api/complaints", async (req, res) => {
+    try {
+      const complaints = await ComplaintModel.find()
+        .sort({ date: -1 }); 
+      
+      res.json(complaints);
+    } catch (error) {
+      console.error("Error fetching all complaints:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+
+  app.get("/api/complaints", async (req, res) => {
+    try {
+      const complaints = await ComplaintModel.find()
+        .sort({ date: -1 }); // Sort by newest first
+      
+      res.json(complaints);
+    } catch (error) {
+      console.error("Error fetching all complaints:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+
+  app.put("/api/complaints/:id/status", async (req, res) => {
+    const { id } = req.params;
+    const { status, patientId } = req.body;
+
+    if (!["Pending", "In Treatment", "Resolved"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+    }
+
+    try {
+        // Update the complaint status
+        const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        if (!updatedComplaint) {
+            return res.status(404).json({ message: "Complaint not found" });
+        }
+
+        // Create a notification for the patient
+        const notificationMessage = 
+            status === "Resolved" 
+                ? "Your complaint has been resolved." 
+                : status === "In Treatment" 
+                    ? "Your complaint is being processed." 
+                    : "Your complaint status has been updated.";
+
+        // Create notification in DB (you'll need to create a Notification model)
+        const notification = new NotificationModel({
+            recipient: patientId,
+            message: notificationMessage,
+            relatedTo: "complaint",
+            relatedId: id,
+            status: "unread",
+            createdAt: new Date()
+        });
+        
+        await notification.save();
+        
+        res.json({
+            complaint: updatedComplaint,
+            notification: {
+                message: notificationMessage,
+                recipient: patientId
+            }
+        });
+    } catch (error) {
+        console.error("Error updating complaint status:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get("/api/patients/:patientId/complaints", async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const complaints = await ComplaintModel.find({ patientId })
+            .sort({ date: -1 });
+
+        res.json(complaints);
+    } catch (error) {
+        console.error("Error fetching patient complaints:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get("/locations", async (req, res) => {
+    try {
+      const locations = await Location.find({ confirmed: true }, "lat lng");
+      if (locations.length === 0) {
+        return res.status(404).json({ message: "Aucune localisation trouvée" });
+      }
+      res.status(200).json(locations);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des localisations:", error.message);
+      res.status(500).json({ error: "Erreur interne du serveur. Veuillez réessayer plus tard." });
+    }
+  });
+  
+  app.get("/locations/pending", async (req, res) => {
+    try {
+      const pendingLocations = await Location.find({ confirmed: false });
+      res.json(pendingLocations);
+    } catch (error) {
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+  
+  app.put("/locations/:id/confirm", async (req, res) => {
+    try {
+      const updated = await Location.findByIdAndUpdate(
+        req.params.id,
+        { confirmed: true },
+        { new: true }
+      );
+      if (!updated) return res.status(404).json({ message: "Localisation introuvable" });
+      res.json({ message: "Localisation confirmée", location: updated });
+    } catch (error) {
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+  
+  app.post("/api/location", async (req, res) => {
     try {
       const { lat, lng } = req.body;
-  
       if (lat === undefined || lng === undefined) {
         return res.status(400).json({ message: "Latitude et longitude sont requises" });
       }
   
-      const newLocation = new locationModel({ lat, lng });
+      const newLocation = new Location({ lat, lng });
       await newLocation.save();
   
       res.status(201).json({ message: "Localisation enregistrée avec succès", location: newLocation });
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la localisation:", error);
       res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
+  app.post('/api/affecterambulace', async (req, res) => { 
+    const { locationId, ambulanceId } = req.body;
+  
+    try {
+      const location = await Location.findById(locationId);
+      const ambulance = await AmbulanceModel.findById(ambulanceId);
+  
+      if (!location || !ambulance) {
+        return res.status(404).json({ message: 'Location or Ambulance not found' });
+      }
+  
+      // Affecter l'ambulance à la localisation
+      location.ambulanceId = ambulance._id;
+      await location.save();
+  
+      res.status(200).json({
+        message: 'Ambulance successfully assigned to location',
+        location: location,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error assigning ambulance to location' });
+    }
+  });
+
+  app.delete('/locations/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      await Location.findByIdAndDelete(id);
+      res.status(200).json({ message: 'Location supprimée avec succès.' });
+    } catch (err) {
+      res.status(500).json({ message: 'Erreur lors de la suppression.', error: err.message });
     }
   });
   
@@ -1167,30 +1390,6 @@ app.put("/doctor/:id/speciality", async (req, res) => {
     }
 });
 
-app.post("/api/complaints", async (req, res) => {
-    const { description, patientId, date } = req.body;
-  
-    if (!description || !patientId || !date) {
-      return res.status(400).json({ error: "Champs requis manquants." });
-    }
-  
-    try {
-      const newComplaint = new ComplaintModel({
-        description,
-        patientId,
-        date,
-        status: "Pending",
-      });
-      await newComplaint.save();
-      res.status(201).json(newComplaint);
-    } catch (error) {
-      console.error("Erreur lors de l’enregistrement :", error);
-      res.status(500).json({ error: "Erreur serveur." });
-    }
-  });
-  
-  
-  
 // Route pour ajouter un rendez-vous
 app.post("/appointments", async (req, res) => {
     try {
@@ -1215,42 +1414,7 @@ app.post("/appointments", async (req, res) => {
       res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
   });
-  app.get("/api/complaints/:patientId", async (req, res) => {
-    try {
-        const { patientId } = req.params;
-        const complaints = await ComplaintModel.find({ patient: patientId });
 
-        res.json(complaints);
-    } catch (error) {
-        console.error("Error fetching complaints:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-app.put("/api/complaints/:id/status", async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!["Pending", "In Treatment", "Resolved"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
-    }
-
-    try {
-        const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
-            id,
-            { status },
-            { new: true } // Return the updated document
-        );
-
-        if (!updatedComplaint) {
-            return res.status(404).json({ message: "Complaint not found" });
-        }
-
-        res.json(updatedComplaint);
-    } catch (error) {
-        console.error("Error updating complaint status:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-});
 
 app.get('/appointments/medecin/:idMedecin', async (req, res) => {
     const { idMedecin } = req.params;

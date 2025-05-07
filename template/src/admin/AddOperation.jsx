@@ -134,6 +134,7 @@ function AddOperation() {
           </select>
         </div>
         <button className="add-operation-button" type="submit">Ajouter l'opération</button>
+       
       </form>
     </div>
   );

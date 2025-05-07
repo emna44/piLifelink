@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { FaChevronDown } from "react-icons/fa";
+import './UpdateProfile.css'; // Importing the CSS file for styling
 
 const UpdateProfile = () => {
   const { id } = useParams();
@@ -26,8 +27,6 @@ const UpdateProfile = () => {
       setLoading(false);
       return;
     }
-
-    console.log("ID récupéré :", id); // Debugging
 
     axios.get(`http://localhost:3001/users/${id}`)
       .then(response => {
@@ -88,16 +87,21 @@ const UpdateProfile = () => {
     try {
       await axios.put(`http://localhost:3001/users/${id}`, formData);
       setMessage("Mise à jour réussie !");
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => navigate(-1), 2000);
     } catch (error) {
       console.error("Erreur lors de la mise à jour :", error);
       setMessage("Erreur lors de la mise à jour.");
     }
   };
 
+  // Function to go back to the previous page
+  const goBack = () => {
+    navigate(-1); // This will navigate to the previous page in the browser history
+  };
+
   return (
-    <div className="login-page">
-      <div className="wrapper">
+    <div className="update-profile-container">
+      <div className="form-wrapper">
         <form onSubmit={handleSubmit}>
           <h1>Modifier le Profil</h1>
 
@@ -107,7 +111,7 @@ const UpdateProfile = () => {
             <p>Chargement des données...</p>
           ) : (
             <>
-              <div className="input-box">
+              <div className="input-field">
                 <input 
                   type="text" 
                   name="name" 
@@ -116,9 +120,10 @@ const UpdateProfile = () => {
                   onChange={handleChange} 
                   required 
                 />
-                {errors.name && <p className="error-message">{errors.name}</p>}
+                {errors.name && <p className="error">{errors.name}</p>}
               </div>
-              <div className="input-box">
+
+              <div className="input-field">
                 <input 
                   type="text" 
                   name="lastName" 
@@ -127,9 +132,10 @@ const UpdateProfile = () => {
                   onChange={handleChange} 
                   required 
                 />
-                {errors.lastName && <p className="error-message">{errors.lastName}</p>}
+                {errors.lastName && <p className="error">{errors.lastName}</p>}
               </div>
-              <div className="input-box">
+
+              <div className="input-field">
                 <input 
                   type="email" 
                   name="email" 
@@ -138,9 +144,10 @@ const UpdateProfile = () => {
                   onChange={handleChange} 
                   required 
                 />
-                {errors.email && <p className="error-message">{errors.email}</p>}
+                {errors.email && <p className="error">{errors.email}</p>}
               </div>
-              <div className="input-box">
+
+              <div className="input-field">
                 <input 
                   type="tel" 
                   name="phone" 
@@ -149,9 +156,10 @@ const UpdateProfile = () => {
                   onChange={handleChange} 
                   required 
                 />
-                {errors.phone && <p className="error-message">{errors.phone}</p>}
+                {errors.phone && <p className="error">{errors.phone}</p>}
               </div>
-              <div className="input-box">
+
+              <div className="input-field">
                 <input 
                   type="number" 
                   name="age" 
@@ -160,9 +168,10 @@ const UpdateProfile = () => {
                   onChange={handleChange} 
                   required 
                 />
-                {errors.age && <p className="error-message">{errors.age}</p>}
+                {errors.age && <p className="error">{errors.age}</p>}
               </div>
-              <div className="input-box">
+
+              <div className="input-field">
                 <select 
                   name="gender" 
                   value={formData.gender} 
@@ -174,14 +183,15 @@ const UpdateProfile = () => {
                   <option value="Female">Femme</option>
                   <option value="Other">Autre</option>
                 </select>
-                <div className="icon"><FaChevronDown /></div>
-                {errors.gender && <p className="error-message">{errors.gender}</p>}
+                <div className="select-icon"><FaChevronDown /></div>
+                {errors.gender && <p className="error">{errors.gender}</p>}
               </div>
 
-              <button type="submit">Mettre à Jour</button>
+              <button type="submit" className="submit-btn">Mettre à Jour</button>
             </>
           )}
         </form>
+        <button type="button" className="back-btn" onClick={goBack}>Retour</button> {/* Back Button */}
       </div>
     </div>
   );

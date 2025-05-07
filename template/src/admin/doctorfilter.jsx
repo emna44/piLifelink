@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import './DoctorFilter.css';
 
 export const DoctorFilter = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedSpeciality, setSelectedSpeciality] = useState(""); // 🔥 Nouvel état pour le filtre
+  const [selectedSpeciality, setSelectedSpeciality] = useState("");
 
   useEffect(() => {
     fetchDoctors();
@@ -24,8 +25,6 @@ export const DoctorFilter = () => {
   };
 
   const affectSpecialty = async (userId, newSpeciality) => {
-    console.log("Nouvelle spécialité sélectionnée :", newSpeciality);
-
     try {
       const response = await fetch(`http://localhost:3001/doctor/${userId}/speciality`, {
         method: "PUT",
@@ -47,7 +46,6 @@ export const DoctorFilter = () => {
     }
   };
 
-  // 🔥 Filtrage des médecins en fonction de la spécialité sélectionnée
   const filteredDoctors = selectedSpeciality
     ? doctors.filter((doctor) => doctor.speciality === selectedSpeciality)
     : doctors;
@@ -58,7 +56,6 @@ export const DoctorFilter = () => {
         <h2>Liste des Médecins</h2>
       </div>
 
-      {/* 🔥 Ajout du filtre par spécialité */}
       <div className="filter-container text-center">
         <label>Filtrer par spécialité :</label>
         <select

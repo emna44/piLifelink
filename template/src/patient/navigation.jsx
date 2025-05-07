@@ -10,7 +10,7 @@ export const Navigation = (props) => {
   useEffect(() => {
     const storedUserName = localStorage.getItem("userName");
     const storedUserId = localStorage.getItem("userId");
-    console.log("Stored User ID in localStorage:", storedUserId); // Debugging
+    console.log("Stored User ID in localStorage:", storedUserId); 
     if (storedUserName) {
       setUserName(storedUserName);
     }
@@ -36,6 +36,14 @@ export const Navigation = (props) => {
     if (userId) {
       console.log("User ID:", userId); // Log the user ID to the console
       navigate(`/showProfile/${userId}`);
+    } else {
+      console.error("User ID not found");
+    }
+  };
+  const handleComplaintsClick = (e) => {
+    e.preventDefault();
+    if (userId) {
+      navigate(`/complaints/${userId}`);
     } else {
       console.error("User ID not found");
     }
@@ -75,7 +83,8 @@ export const Navigation = (props) => {
               </a>
             </li>
             <li>
-              <a href="#complaints/${userId}" className="page-scroll">Complaints</a>
+
+            <a href="#" className="page-scroll" onClick={handleComplaintsClick}>Complaints</a>      
             </li>
             <li>
               <a href="#testimonials" className="page-scroll">
