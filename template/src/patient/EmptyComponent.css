@@ -1,0 +1,7 @@
+.empty-container {
+  height: 100vh; /* Occupe toute la hauteur de la fenêtre */
+  width: 100%;   /* Occupe toute la largeur de la fenêtre */
+  padding: 50px; /* Ajoute beaucoup d'espace interne */
+  margin: 30px;  /* Ajoute de l'espace autour du composant */
+  background-color: #f0f0f0; /* Optionnel : couleur de fond pour mieux visualiser l'espace */
+}

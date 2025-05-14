@@ -1,0 +1,147 @@
+/* PredictionPage.css */
+
+.prediction-container {
+  max-width: 800px;
+  margin: 100px auto 50px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.prediction-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+.prediction-header h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.prediction-header p {
+  color: #7f8c8d;
+  font-size: 16px;
+}
+
+.prediction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  min-height: 150px;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.predict-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  align-self: flex-start;
+}
+
+.predict-button:hover {
+  background-color: #2980b9;
+}
+
+.predict-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.prediction-result {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.prediction-result h4 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 20px;
+}
+
+.result-item {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.result-item strong {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.error-message {
+  color: #e74c3c;
+  background-color: #fadbd8;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  border-left: 4px solid #e74c3c;
+}
+
+.loading-indicator {
+  display: inline-block;
+  margin-left: 10px;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .prediction-container {
+    margin: 80px 20px 30px;
+    padding: 20px;
+  }
+  
+  .prediction-header h2 {
+    font-size: 24px;
+  }
+  
+  .form-group textarea {
+    min-height: 120px;
+  }
+}

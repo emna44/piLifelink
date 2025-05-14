@@ -1,0 +1,53 @@
+/* VoiceCommandButton.css */
+.voice-command-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.voice-command-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.voice-command-btn:hover {
+  background-color: #2c5282;
+  transform: translateY(-1px);
+}
+
+.voice-command-btn:active {
+  transform: translateY(0);
+}
+
+.voice-command-btn.listening {
+  background-color: #e53e3e;
+  animation: pulse 1.5s infinite;
+}
+
+.voice-icon {
+  font-size: 16px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(229, 62, 62, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0);
+  }
+}

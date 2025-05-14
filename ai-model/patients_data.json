@@ -1,0 +1,92 @@
+[
+  {
+    "symptoms": "fièvre toux fatigue",
+    "medicalHistory": "asthme",
+    "gravite": "Urgent",
+    "speciality": "Pneumologue"
+  },
+  {
+    "symptoms": "maux de tête vomissements",
+    "medicalHistory": "hypertension",
+    "gravite": "Very Urgent",
+    "speciality": "Neurologue"
+  },
+  {
+    "symptoms": "douleur abdominale diarrhée",
+    "medicalHistory": "aucun",
+    "gravite": "Standard",
+    "speciality": "Gastro-entérologue"
+  },
+  {
+    "symptoms": "douleur thoracique essoufflement",
+    "medicalHistory": "diabète",
+    "gravite": "Immediate",
+    "speciality": "Cardiologue"
+  },
+  {
+    "symptoms": "perte de vision soudaine",
+    "medicalHistory": "glaucome",
+    "gravite": "Very Urgent",
+    "speciality": "Ophtalmologue"
+  },
+  {
+    "symptoms": "brûlures urinaire douleur pelvienne",
+    "medicalHistory": "infections urinaires fréquentes",
+    "gravite": "Urgent",
+    "speciality": "Urologue"
+  },
+  {
+    "symptoms": "démangeaisons éruptions cutanées",
+    "medicalHistory": "eczéma",
+    "gravite": "Standard",
+    "speciality": "Dermatologue"
+  },
+  {
+    "symptoms": "confusion perte de mémoire",
+    "medicalHistory": "Alzheimer",
+    "gravite": "Very Urgent",
+    "speciality": "Neurologue"
+  },
+  {
+    "symptoms": "sang dans les selles",
+    "medicalHistory": "polypes intestinaux",
+    "gravite": "Urgent",
+    "speciality": "Gastro-entérologue"
+  },
+  {
+    "symptoms": "douleur à la mâchoire douleur à l'épaule",
+    "medicalHistory": "cholestérol élevé",
+    "gravite": "Immediate",
+    "speciality": "Cardiologue"
+  },
+  {
+    "symptoms": "troubles de l'élocution paralysie faciale",
+    "medicalHistory": "antécédents d'AVC",
+    "gravite": "Immediate",
+    "speciality": "Neurologue"
+  },
+  {
+    "symptoms": "toux chronique douleurs thoraciques",
+    "medicalHistory": "bronchite chronique",
+    "gravite": "Urgent",
+    "speciality": "Pneumologue"
+  },
+  {
+    "symptoms": "maux de dos fièvre",
+    "medicalHistory": "infection rénale",
+    "gravite": "Urgent",
+    "speciality": "Néphrologue"
+  },
+  {
+    "symptoms": "vomissements douleurs abdominales fièvre",
+    "medicalHistory": "appendicite",
+    "gravite": "Very Urgent",
+    "speciality": "Chirurgien généraliste"
+  },
+  {
+    "symptoms": "vision floue yeux rouges",
+    "medicalHistory": "conjonctivite fréquente",
+    "gravite": "Standard",
+    "speciality": "Ophtalmologue"
+  }
+]

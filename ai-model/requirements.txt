@@ -1,0 +1,8 @@
+torch
+torchvision
+medmnist
+flask
+numpy
+matplotlib
+predict_from_pdf_knn
+
